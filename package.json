@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
+    "@vercel/analytics": "^1.5.0",
     "@vercel/node": "^5.3.23",
+    "@vercel/speed-insights": "^1.2.0",
     "clsx": "^2.1.1",
     "motion": "^12.23.16",
     "react": "^19.1.1",
