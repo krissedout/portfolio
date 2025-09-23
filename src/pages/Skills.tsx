@@ -15,7 +15,7 @@ export default function SkillsPage() {
                         <h1 className={"text-4xl font-poppins leading-tight text-[#d3d3d3]"}>languages i can speak</h1>
                         <div className={"w-full h-[2px] bg-[#444444] my-4"} />
                     </div>
-                    <img src={languagesInventory} className={"w-[70%] flex flex-col items-start justify-start overflow-y-scroll"}  alt={"skills inventory"}/>
+                    <img src={languagesInventory} className={"w-full xl:w-[70%] flex flex-col items-start justify-start overflow-y-scroll"}  alt={"skills inventory"}/>
                     <h1 className={"text-2xl font-poppins leading-tight text-[#878787]"}>...and the languages i literally made up</h1>
                 </div>
 
@@ -24,7 +24,7 @@ export default function SkillsPage() {
                         <h1 className={"text-4xl font-poppins leading-tight text-[#d3d3d3]"}>tech i use</h1>
                         <div className={"w-full h-[2px] bg-[#444444] my-4"} />
                     </div>
-                    <img src={skillsInventory} className={"w-[70%] flex flex-col items-start justify-start overflow-y-scroll"}  alt={"skills inventory"}/>
+                    <img src={skillsInventory} className={"w-full xl:w-[70%] flex flex-col items-start justify-start overflow-y-scroll"}  alt={"skills inventory"}/>
                 </div>
 
                 <div className={"flex flex-col gap-[20px] w-full"}>
@@ -32,7 +32,7 @@ export default function SkillsPage() {
                         <h1 className={"text-4xl font-poppins leading-tight text-[#d3d3d3]"}>things i bring to the team</h1>
                         <div className={"w-full h-[2px] bg-[#444444] my-4"} />
                     </div>
-                    <p className={"text-[28px] md:text-[32px] lg:text-[36px] font-poppins text-[#878787] gap-[20px] flex flex-col"}>
+                    <p className={"text-[24px] md:text-[32px] lg:text-[36px] font-poppins text-[#878787] gap-[20px] flex flex-col"}>
                         <span>• i’m both a designer and programmer so i understand how both work.</span>
                         <span>• i don’t just make things pretty, i design workflows, ecosystems, and infrastructure that scales.</span>
                         <span>• i love breaking things down, debugging messy issues, and finding clean solutions.</span>
@@ -53,7 +53,7 @@ export default function SkillsPage() {
                         <div className={"w-full h-[2px] bg-[#444444] my-4"} />
                     </div>
                     <div className={"flex flex-col gap-[40px] w-full"}>
-                        <div className={"flex flex-row gap-[25px] w-[70%]"}>
+                        <div className={"flex flex-col xl:flex-row items-start gap-[25px] w-full xl:w-[70%]"}>
                             <img src={linux} className={"h-full"}  alt={"linux logo"}/>
                             <div className={"flex flex-col gap-[5px]"}>
                                 <h1 className={"text-[36px] font-poppins leading-tight text-[#d3d3d3]"}>sysadmin</h1>
@@ -61,7 +61,7 @@ export default function SkillsPage() {
                             </div>
                         </div>
 
-                        <div className={"flex flex-row gap-[25px] w-[70%]"}>
+                        <div className={"flex flex-col xl:flex-row items-start gap-[25px] w-full xl:w-[70%]"}>
                             <img src={server} className={"h-full"}  alt={"linux logo"}/>
                             <div className={"flex flex-col gap-[5px]"}>
                                 <h1 className={"text-[36px] font-poppins leading-tight text-[#d3d3d3]"}>homelab</h1>
@@ -69,7 +69,7 @@ export default function SkillsPage() {
                             </div>
                         </div>
 
-                        <div className={"flex flex-row gap-[25px] w-[70%]"}>
+                        <div className={"flex flex-col xl:flex-row items-start gap-[25px] w-full xl:w-[70%]"}>
                             <img src={unity} className={"h-full"}  alt={"linux logo"}/>
 
                             <div className={"flex flex-col gap-[5px]"}>
@@ -78,7 +78,7 @@ export default function SkillsPage() {
                             </div>
                         </div>
 
-                        <div className={"flex flex-row gap-[25px] w-[70%]"}>
+                        <div className={"flex flex-col xl:flex-row items-start gap-[25px] w-full xl:w-[70%]"}>
                             <img src={signature} className={"h-full"}  alt={"linux logo"}/>
                             <div className={"flex flex-col gap-[5px]"}>
                                 <h1 className={"text-[36px] font-poppins leading-tight text-[#d3d3d3]"}>conlangs</h1>

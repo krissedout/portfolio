@@ -3,7 +3,7 @@ export default function AboutPage() {
         <>
             <div className={"w-full h-full flex flex-col items-start justify-start overflow-y-scroll scroll-smooth no-scrollbar"}>
                 <span className={"absolute bottom-[30px] self-center"}>psst.. you can scroll!</span>
-                <p className={"text-[28px] md:text-[32px] lg:text-[36px] font-poppins text-[#878787]"}>
+                <p className={"text-[24px] md:text-[32px] lg:text-[36px] font-poppins text-[#878787]"}>
                     hey… wait, who even are you?
                     <br /><br />
                     whatever. this is my page.
