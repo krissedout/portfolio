@@ -24,7 +24,7 @@ export default function ContactPage() {
                             </div>
                         </div>
 
-                        <div className={"flex flex-col gap-2 xl:w-[48%] mt-[10px] xl:mt-0 h-[250px]"}>
+                        <div className={"flex flex-col gap-2 xl:w-[48%] mt-[10px] xl:mt-0 h-[250px] xl:h-full"}>
                             <span className={"text-[26px] xl:text-[32px] font-poppins text-[#878787]"}>spill the tea, i don’t bite (usually)</span>
                             <textarea className={"bg-[#171717] px-[20px] py-[10px] focus:outline-none text-[28px] font-poppins text-[#D8D7D7] h-full"} />
                         </div>
