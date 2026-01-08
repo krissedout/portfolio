@@ -19,12 +19,14 @@
     }
 }
 
-/* Fonts */
-body {
+html, body, #root {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
     color: #878787;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
 
 /* Hide scrollbars */
@@ -35,4 +37,48 @@ html {
 
 html::-webkit-scrollbar {
     display: none;
+}
+/* Full height utility that works with zoom */
+.h-screen-fixed {
+    height: 100%;
+}
+
+/* Min height utility that works with zoom */
+.min-h-screen-fixed {
+    min-height: 100%;
+}
+
+html {
+    zoom: 1;
+}
+
+/* Responsive zoom scaling for smaller screens */
+@media (max-width: 1440px) {
+    html {
+        zoom: 0.9;
+    }
+}
+
+@media (max-width: 1280px) {
+    html {
+        zoom: 0.8;
+    }
+}
+
+@media (max-width: 1024px) {
+    html {
+        zoom: 0.7;
+    }
+}
+
+@media (max-width: 900px) {
+    html {
+        zoom: 0.6;
+    }
+}
+
+@media (max-width: 768px) {
+    html {
+        zoom: 0.45;
+    }
 }

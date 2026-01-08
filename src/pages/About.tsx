@@ -22,7 +22,7 @@ export default function AboutPage() {
                     <br /><br />
                     xoxo,
                     <br />
-                    artemas &lt;3
+                    your kris &lt;3
                 </p>
             </div>
         </>

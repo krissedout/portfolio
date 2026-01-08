@@ -70,7 +70,7 @@ export default function ContactPage() {
                         </button>
 
                         <p className={"text-[24px] font-poppins text-[#878787] text-center"}>
-                            or just email me at <a href="mailto:artemas@lanth.me" className="text-[#714DD7] underline">artemas@lanth.me</a>
+                            or just email me at <a href="mailto:kristof@lanth.me" className="text-[#714DD7] underline">kristof@lanth.me</a>
                         </p>
                     </div>
                 </div>
