@@ -64,6 +64,13 @@ const projects: Project[] = [
         color: "#1DB954",
     },
     {
+        name: "Conlanger",
+        url: "https://www.conlanger.site/",
+        description: "Create your own constructed languages. Realtime collaboration, guided workflows, and everything you need to build your next conlang. Powered by Convex and Ave.",
+        color: "#E056FD",
+        status: "active",
+    },
+    {
         name: "Monkeys",
         url: "https://monkeys.rs",
         description: "Party games for you and your friends. Host a lobby, pick a game like Monkeys Against Humanity or Skeddadle, and play, laugh, repeat. Still cooking this one.",
