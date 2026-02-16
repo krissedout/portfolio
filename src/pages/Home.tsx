@@ -86,7 +86,7 @@ function HomePage({setPage}: PageProps) {
     )
 }
 
-// Full page wrapper for scrollable content - same style as floating card but extended to bottom
+// Full page wrapper for scrollable content - same style as floating card but extended to bottom edge
 function FullPageWrapper({ children, onClose }: { children: React.ReactNode; page: string; onClose: () => void }) {
     return (
         <motion.div
@@ -96,9 +96,9 @@ function FullPageWrapper({ children, onClose }: { children: React.ReactNode; pag
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
         >
-            {/* Content container - same style as floating card but extended to bottom */}
+            {/* Content container - same style as floating card but extends to bottom edge */}
             <motion.div
-                className="w-[90%] h-[90%] bg-[#121212]/50 flex flex-col items-start justify-between p-[60px] xl:p-20 pb-0 backdrop-blur-[20px]"
+                className="w-[90%] bg-[#121212]/50 flex flex-col backdrop-blur-[20px] absolute top-[10%] bottom-0 left-1/2 -translate-x-1/2"
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: 50, opacity: 0 }}
@@ -114,8 +114,8 @@ function FullPageWrapper({ children, onClose }: { children: React.ReactNode; pag
                     </svg>
                 </button>
 
-                {/* Page content */}
-                <div className="h-full w-full overflow-y-auto no-scrollbar pb-[60px] xl:pb-20">
+                {/* Page content with padding on top/sides, no padding on bottom */}
+                <div className="h-full w-full overflow-y-auto no-scrollbar p-[60px] xl:p-20 pb-0">
                     {children}
                 </div>
             </motion.div>
