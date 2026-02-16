@@ -3,9 +3,22 @@ import languagesInventory from "../assets/languages inventory.svg";
 import linux from "../assets/linux.svg";
 import server from "../assets/server.svg";
 import signature from "../assets/signature.svg";
+import { useState } from "react";
 
 export default function SkillsPage() {
   const { isAuthenticated, loading } = useAuth();
+  const [easterEggClicks, setEasterEggClicks] = useState(0);
+  const [showPreviewEasterEgg, setShowPreviewEasterEgg] = useState(false);
+
+  // Easter egg: click the scroll hint 5 times to enable preview mode
+  const handleEasterEggClick = () => {
+    const newCount = easterEggClicks + 1;
+    setEasterEggClicks(newCount);
+    if (newCount >= 5) {
+      setShowPreviewEasterEgg(true);
+      setEasterEggClicks(0);
+    }
+  };
 
   if (loading) {
     return (
@@ -17,8 +30,18 @@ export default function SkillsPage() {
 
   return (
     <div className="w-full h-full flex flex-col items-start justify-start overflow-y-scroll scroll-smooth gap-[100px] no-scrollbar">
-      {!isAuthenticated && (
-        <span className="absolute bottom-[30px] self-center text-[#878787]">psst.. you can scroll!</span>
+      {!isAuthenticated && !showPreviewEasterEgg && (
+        <span 
+          className="absolute bottom-[30px] self-center text-[#878787] cursor-pointer select-none" 
+          onClick={handleEasterEggClick}
+        >
+          psst.. you can scroll!
+        </span>
+      )}
+      {showPreviewEasterEgg && !isAuthenticated && (
+        <span className="absolute bottom-[30px] self-center text-[#714DD7]">
+          🎉 You found the easter egg! This is what editing looks like.
+        </span>
       )}
 
       {/* Languages section - static for now, can be made into blocks */}
@@ -31,7 +54,7 @@ export default function SkillsPage() {
       </div>
 
       {/* Block-based content */}
-      <BlocksContainer pageId="skills" isEditing={isAuthenticated} />
+      <BlocksContainer pageId="skills" isEditing={isAuthenticated || showPreviewEasterEgg} />
 
       {/* Static skill sections - can be converted to blocks */}
       <div className="flex flex-col gap-[20px] w-full">

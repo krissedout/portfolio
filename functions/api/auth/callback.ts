@@ -133,16 +133,17 @@ export async function onRequestGet({ request, env }: PagesContext) {
       .run();
 
     // Clear auth cookies and set session cookie
+    // Note: Multiple Set-Cookie headers must be set separately
+    const headers = new Headers({
+      "Location": "/",
+    });
+    headers.append("Set-Cookie", "pkce_verifier=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0");
+    headers.append("Set-Cookie", "auth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0");
+    headers.append("Set-Cookie", `session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`);
+
     return new Response(null, {
       status: 302,
-      headers: {
-        "Location": "/",
-        "Set-Cookie": [
-          "pkce_verifier=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0",
-          "auth_state=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0",
-          `session=${sessionId}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`,
-        ].join(", "),
-      },
+      headers,
     });
   } catch (err) {
     console.error("Auth callback error:", err);

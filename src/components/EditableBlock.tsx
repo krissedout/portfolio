@@ -259,7 +259,7 @@ export function HeadingBlock({
   onUpdate: (content: Record<string, unknown>) => void;
 }) {
   const content = block.content as { text?: string; level?: "h1" | "h2" | "h3" };
-  const level = content.level || "h2";
+  const level = content.level || "h1";
   
   const sizeClass = {
     h1: "text-4xl",
@@ -268,13 +268,16 @@ export function HeadingBlock({
   }[level];
 
   return (
-    <EditableField
-      value={content.text || ""}
-      onChange={(text) => onUpdate({ ...content, text })}
-      placeholder="Enter heading..."
-      className={`text-[#d3d3d3] font-poppins font-bold ${sizeClass} w-full`}
-      isEditing={isEditing}
-    />
+    <div className="flex flex-col gap-[5px] w-full">
+      <EditableField
+        value={content.text || ""}
+        onChange={(text) => onUpdate({ ...content, text })}
+        placeholder="Enter heading..."
+        className={`text-[#d3d3d3] font-poppins leading-tight ${sizeClass} w-full`}
+        isEditing={isEditing}
+      />
+      <div className="w-full h-[2px] bg-[#444444] my-4" />
+    </div>
   );
 }
 

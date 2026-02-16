@@ -78,16 +78,15 @@ export async function onRequestGet({ request, env }: PagesContext) {
   authUrl.searchParams.set("response_type", "code");
 
   // Store verifier and state in cookies for the callback
-  const cookies = [
-    `pkce_verifier=${verifier}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,
-    `auth_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`,
-  ];
+  // Note: Multiple Set-Cookie headers must be set separately
+  const headers = new Headers({
+    "Location": authUrl.toString(),
+  });
+  headers.append("Set-Cookie", `pkce_verifier=${verifier}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`);
+  headers.append("Set-Cookie", `auth_state=${state}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=600`);
 
   return new Response(null, {
     status: 302,
-    headers: {
-      "Location": authUrl.toString(),
-      "Set-Cookie": cookies.join(', '),
-    },
+    headers,
   });
 }

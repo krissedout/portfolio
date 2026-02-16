@@ -94,20 +94,20 @@ function FullPageWrapper({ children, onClose }: { children: React.ReactNode; pag
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.3 }}
         >
             {/* Content container - same style as floating card but extends to bottom edge */}
             <motion.div
                 className="w-[90%] bg-[#121212]/50 flex flex-col backdrop-blur-[20px] absolute top-[10%] bottom-0 left-1/2 -translate-x-1/2"
-                initial={{ y: 50, opacity: 0 }}
+                initial={{ y: 30, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 50, opacity: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
+                exit={{ y: 30, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
             >
-                {/* Close button */}
+                {/* Close button - on the left side */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-6 text-[#878787] hover:text-white transition-colors z-10"
+                    className="absolute top-4 left-6 text-[#878787] hover:text-white transition-colors z-10"
                 >
                     <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -182,7 +182,7 @@ export default function Home() {
                         animate={{ 
                             clipPath: "inset(0% 0% 0% 0%)"
                         }}
-                        transition={{ duration: 1, delay: 0.8, ease: "anticipate" }}
+                        transition={{ duration: 0.5, delay: 0.2, ease: "anticipate" }}
                     >
                         <motion.img
                             src={wallpaper}
@@ -190,7 +190,7 @@ export default function Home() {
                             className="h-full w-full object-cover object-center"
                             initial={{ scale: 1.05 }}
                             animate={{ scale: 1 }}
-                            transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
+                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
                             onAnimationComplete={() => setShowedBackground(true)}
                         />
                     </motion.div>
@@ -198,7 +198,7 @@ export default function Home() {
 
                 {showedBackground && (
                     /*Paper clip*/
-                    <div className={"absolute top-[5%] right-[2%] pointer-events-none"}>
+                    <div className={"absolute top-[5%] right-[2%] pointer-events-none z-50"}>
                         {/*Clip base*/}
                         <motion.svg width="142" height="129" viewBox="0 0 142 129" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <motion.path
@@ -210,14 +210,14 @@ export default function Home() {
                                 fill="none"
                                 initial={{ pathLength: 0 }}
                                 animate={{ pathLength: 1 }}
-                                transition={{ duration: 1.2, ease: "easeInOut", delay: 0.15 }}
+                                transition={{ duration: 0.8, ease: "easeInOut", delay: 0.1 }}
                                 onAnimationComplete={() => setFirstClipPathDone(true)}
                             />
                         </motion.svg>
 
                         {/*Line over the content*/}
                         {firstClipPathDone && (
-                            <motion.svg width="71" height="98" viewBox="0 0 71 98" fill="none" xmlns="http://www.w3.org/2000/svg" className={"z-10 absolute top-[30%] left-[0%]"}>
+                            <motion.svg width="71" height="98" viewBox="0 0 71 98" fill="none" xmlns="http://www.w3.org/2000/svg" className={"absolute top-[30%] left-[0%]"}>
                                 <motion.path
                                     d="M1.90263 1.3873C1.5319 7.01841 2.27976 12.6672 4.10306 18.0079C5.92636 23.3485 8.78902 28.2753 12.5259 32.5041L69.1389 96.309"
                                     stroke="#D8D8D8"
@@ -227,7 +227,7 @@ export default function Home() {
                                     fill="none"
                                     initial={{ pathLength: 0 }}
                                     animate={{ pathLength: 1 }}
-                                    transition={{ duration: 0.9, ease: "easeInOut", delay: 0.25 }}
+                                    transition={{ duration: 0.6, ease: "easeInOut", delay: 0.1 }}
                                 />
                             </motion.svg>
                         )}
@@ -240,7 +240,7 @@ export default function Home() {
                         className={"absolute w-[90%] h-[80%] self-center bg-[#121212]/50 flex flex-col items-start justify-between p-[60px] xl:p-20 backdrop-blur-[20px]"}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 0.8, delay: 0.5 }}
+                        transition={{ duration: 0.3, delay: 0.2 }}
                         key={page}
                     >
                         {page === "home" && <HomePage setPage={setPage} />}
