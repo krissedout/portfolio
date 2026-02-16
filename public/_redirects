@@ -1,0 +1,2 @@
+# SPA fallback - redirect all non-api routes to index.html
+/*  /index.html 200

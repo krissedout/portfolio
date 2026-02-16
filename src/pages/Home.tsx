@@ -12,6 +12,9 @@ export type PageProps = {
     setPage: Dispatch<SetStateAction<string>>;
 }
 
+// Pages that should be "full page" style (connected to bottom, scrollable)
+const FULL_PAGE_TYPES = ["about", "skills", "work"];
+
 function HomePage({setPage}: PageProps) {
     return (
         <div className={"h-full flex flex-col justify-between w-full overflow-y-scroll scroll-smooth no-scrollbar"}>
@@ -83,6 +86,51 @@ function HomePage({setPage}: PageProps) {
     )
 }
 
+// Full page wrapper for scrollable content
+function FullPageWrapper({ children, page, onClose }: { children: React.ReactNode; page: string; onClose: () => void }) {
+    return (
+        <motion.div
+            className="fixed inset-0 z-40 bg-[#090909]"
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ duration: 0.4 }}
+        >
+            {/* Background */}
+            <div className="absolute inset-0 overflow-hidden">
+                <img
+                    src={wallpaper}
+                    alt="Wallpaper"
+                    className="h-full w-full object-cover object-center opacity-30"
+                />
+            </div>
+
+            {/* Content container - connected to bottom */}
+            <div className="absolute bottom-0 left-0 right-0 h-[85vh] bg-[#121212]/90 backdrop-blur-[20px] rounded-t-[40px] overflow-hidden">
+                {/* Handle for scroll indication */}
+                <div className="flex justify-center pt-4 pb-2">
+                    <div className="w-12 h-1 bg-[#3A3A3A] rounded-full" />
+                </div>
+
+                {/* Close button */}
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-6 text-[#878787] hover:text-white transition-colors z-10"
+                >
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                {/* Page content */}
+                <div className="h-full overflow-y-auto no-scrollbar px-8 xl:px-16 pb-8">
+                    {children}
+                </div>
+            </div>
+        </motion.div>
+    );
+}
+
 export default function Home() {
     const [loaded, setLoaded] = useState(false);
     const [finishedHello, setFinishedHello] = useState(false);
@@ -118,6 +166,8 @@ export default function Home() {
             window.removeEventListener("popstate", handlePopState);
         };
     }, [page]);
+
+    const isFullPage = FULL_PAGE_TYPES.includes(page);
 
     return (
         <div className={"w-full h-screen-fixed bg-[#090909] flex items-center justify-center overflow-y-hidden"}>
@@ -192,8 +242,8 @@ export default function Home() {
                     </div>
                 )}
 
-                {showedBackground && (
-                    // Content
+                {showedBackground && !isFullPage && (
+                    // Content - floating card style for home and contact
                     <motion.div
                         className={"absolute w-[90%] h-[80%] self-center bg-[#121212]/50 flex flex-col items-start justify-between p-[60px] xl:p-20 backdrop-blur-[20px]"}
                         initial={{ opacity: 0 }}
@@ -202,11 +252,17 @@ export default function Home() {
                         key={page}
                     >
                         {page === "home" && <HomePage setPage={setPage} />}
-                        {page === "about" && <AboutPage />}
                         {page === "contact" && <ContactPage />}
+                    </motion.div>
+                )}
+
+                {/* Full page content for about, skills, work */}
+                {showedBackground && isFullPage && (
+                    <FullPageWrapper page={page} onClose={() => setPage("home")}>
+                        {page === "about" && <AboutPage />}
                         {page === "skills" && <SkillsPage />}
                         {page === "work" && <WorkPage />}
-                    </motion.div>
+                    </FullPageWrapper>
                 )}
             </motion.div>
         </div>

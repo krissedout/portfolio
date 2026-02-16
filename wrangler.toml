@@ -1,0 +1,15 @@
+name = "portfolio"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "portfolio-content"
+database_id = "d60434ef-7438-4d07-b9a4-65593fd4b784"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "portfolio-images"
+
+[vars]
+AVE_CLIENT_ID = "app_8ec56c34adce8150132442746dd2f80f"
