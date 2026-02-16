@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import wallpaper from "../assets/wallpaper.jpg";
 
 type Project = {
   id: string;
@@ -94,7 +95,7 @@ export default function AdminPage() {
     <div className="min-h-screen bg-[#090909] text-white font-poppins p-8">
       {/* Background */}
       <div className="fixed inset-0 opacity-20 pointer-events-none">
-        <img src="/wallpaper.jpg" alt="" className="w-full h-full object-cover" />
+        <img src={wallpaper} alt="" className="w-full h-full object-cover" />
       </div>
       <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
@@ -146,6 +147,7 @@ export default function AdminPage() {
             setPages={setPages}
             editingPage={editingPage}
             setEditingPage={setEditingPage}
+            setSaveStatus={setSaveStatus}
           />
         )}
         {activeTab === "images" && <ImagesTab />}
@@ -207,51 +209,6 @@ function ProjectsTab({
       .replace(/^-|-$/g, "");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaveStatus("saving");
-    
-    if (editingProject) {
-      // Update existing project
-      const res = await fetch(`/api/projects/${editingProject.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        setProjects(projects.map((p) => (p.id === editingProject.id ? { ...p, ...formData } as Project : p)));
-        setEditingProject(null);
-        setSaveStatus("saved");
-        setTimeout(() => setSaveStatus("idle"), 2000);
-      }
-    } else {
-      // Create new project
-      const res = await fetch("/api/projects", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        const newProject = await res.json();
-        setProjects([...projects, newProject]);
-        setFormData({
-          name: "",
-          slug: "",
-          url: "",
-          description: "",
-          long_description: "",
-          status: "active",
-          screenshots: [],
-          technologies: [],
-          featured: 0,
-          sort_order: 0,
-        });
-        setSaveStatus("saved");
-        setTimeout(() => setSaveStatus("idle"), 2000);
-      }
-    }
-  };
-
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this project?")) return;
     
@@ -261,199 +218,289 @@ function ProjectsTab({
     }
   };
 
+  // Modal form state
+  const [showModal, setShowModal] = useState(false);
+  const [isNewProject, setIsNewProject] = useState(false);
+
+  const openNewProject = () => {
+    setFormData({
+      name: "",
+      slug: "",
+      url: "",
+      description: "",
+      long_description: "",
+      status: "active",
+      screenshots: [],
+      technologies: [],
+      featured: 0,
+      sort_order: 0,
+    });
+    setIsNewProject(true);
+    setShowModal(true);
+  };
+
+  const openEditProject = (project: Project) => {
+    setFormData(project);
+    setEditingProject(project);
+    setIsNewProject(false);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingProject(null);
+  };
+
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-      {/* Form */}
-      <div className="bg-[#121212] p-6">
-        <h2 className="text-2xl font-poppins mb-6 text-[#d3d3d3]">{editingProject ? "edit project" : "new project"}</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-[#878787] mb-1 font-poppins text-sm">name *</label>
-            <input
-              type="text"
-              value={formData.name || ""}
-              onChange={(e) => {
-                const name = e.target.value;
-                setFormData({ ...formData, name, slug: generateSlug(name) });
-              }}
-              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1 font-poppins text-sm">slug *</label>
-            <input
-              type="text"
-              value={formData.slug || ""}
-              onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1 font-poppins text-sm">url</label>
-            <input
-              type="url"
-              value={formData.url || ""}
-              onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
-            />
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1 font-poppins text-sm">description *</label>
-            <textarea
-              value={formData.description || ""}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-24 resize-none"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1 font-poppins text-sm">long description</label>
-            <textarea
-              value={formData.long_description || ""}
-              onChange={(e) => setFormData({ ...formData, long_description: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-32 resize-none"
-            />
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1 font-poppins text-sm">status</label>
-            <select
-              value={formData.status || "active"}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
-            >
-              <option value="active">active</option>
-              <option value="wip">wip</option>
-              <option value="archived">archived</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1 font-poppins text-sm">technologies</label>
-            <div className="flex flex-wrap gap-2 p-3 bg-[#1A1A1A] border border-[#2A2A2A] focus-within:border-[#714DD7] transition-colors min-h-[50px]">
-              {formData.technologies?.map((tech, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-[#2A2A2A] text-white text-sm font-poppins rounded"
-                >
-                  {tech}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newTechs = [...(formData.technologies || [])];
-                      newTechs.splice(index, 1);
-                      setFormData({ ...formData, technologies: newTechs });
-                    }}
-                    className="text-[#878787] hover:text-white ml-1"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-              <input
-                type="text"
-                placeholder={formData.technologies?.length ? "" : "Type and press enter..."}
-                className="flex-1 min-w-[120px] bg-transparent outline-none text-white font-poppins text-sm"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    const value = (e.target as HTMLInputElement).value.trim();
-                    if (value && !formData.technologies?.includes(value)) {
-                      setFormData({
-                        ...formData,
-                        technologies: [...(formData.technologies || []), value],
-                      });
-                      (e.target as HTMLInputElement).value = "";
-                    }
-                  }
-                }}
-              />
+    <div className="bg-[#121212] p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-poppins text-[#d3d3d3]">projects ({projects.length})</h2>
+        <button
+          onClick={openNewProject}
+          className="px-4 py-2 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white"
+        >
+          + new project
+        </button>
+      </div>
+      
+      <div className="flex flex-col gap-4">
+        {projects.map((project) => (
+          <div key={project.id} className="bg-[#1A1A1A] p-4 flex justify-between items-start">
+            <div className="flex items-start gap-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-white">{project.name}</span>
+                  {project.status === "wip" && (
+                    <span className="text-xs bg-[#2A2A2A] text-[#878787] px-2 py-0.5 rounded">wip</span>
+                  )}
+                  {project.featured === 1 && (
+                    <span className="text-xs bg-[#714DD7] px-2 py-0.5 rounded">featured</span>
+                  )}
+                </div>
+                <p className="text-[#878787] text-sm mt-1 line-clamp-2">{project.description}</p>
+              </div>
             </div>
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1 font-poppins text-sm">screenshots (one URL per line)</label>
-            <textarea
-              value={formData.screenshots?.join("\n") || ""}
-              onChange={(e) => setFormData({ ...formData, screenshots: e.target.value.split("\n").filter((s) => s.trim()) })}
-              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-24 resize-none"
-              placeholder="https://example.com/image1.png\nhttps://example.com/image2.png"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[#878787] mb-1 font-poppins text-sm">sort order</label>
-              <input
-                type="number"
-                value={formData.sort_order || 0}
-                onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) })}
-                className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
-              />
-            </div>
-            <div className="flex items-center gap-2 pt-6">
-              <input
-                type="checkbox"
-                checked={formData.featured ? true : false}
-                onChange={(e) => setFormData({ ...formData, featured: e.target.checked ? 1 : 0 })}
-                className="w-5 h-5"
-              />
-              <label>featured</label>
-            </div>
-          </div>
-          <div className="flex gap-4 mt-4">
-            <button type="submit" className="flex-1 py-3 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white">
-              {editingProject ? "update" : "create"}
-            </button>
-            {editingProject && (
+            <div className="flex gap-2">
               <button
-                type="button"
-                onClick={() => setEditingProject(null)}
-                className="flex-1 py-3 bg-[#1A1A1A] hover:bg-[#2A2A2A] transition font-poppins text-white"
+                onClick={() => openEditProject(project)}
+                className="px-3 py-1 bg-[#2A2A2A] hover:bg-[#3A3A3A] text-sm text-white"
               >
-                cancel
+                edit
               </button>
-            )}
+              <button
+                onClick={() => handleDelete(project.id)}
+                className="px-3 py-1 bg-[#FF4444] hover:bg-[#CC0000] text-sm"
+              >
+                delete
+              </button>
+            </div>
           </div>
-        </form>
+        ))}
       </div>
 
-      {/* List */}
-      <div className="bg-[#121212] p-6">
-        <h2 className="text-2xl font-poppins mb-6 text-[#d3d3d3]">projects ({projects.length})</h2>
-        <div className="flex flex-col gap-4 max-h-[600px] overflow-y-auto">
-          {projects.map((project) => (
-            <div key={project.id} className="bg-[#1A1A1A] p-4 flex justify-between items-start">
-              <div className="flex items-start gap-3">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{project.name}</span>
-                    {project.status === "wip" && (
-                      <span className="text-xs bg-[#2A2A2A] px-2 py-0.5 rounded">wip</span>
-                    )}
-                    {project.featured === 1 && (
-                      <span className="text-xs bg-[#714DD7] px-2 py-0.5 rounded">featured</span>
-                    )}
-                  </div>
-                  <p className="text-[#878787] text-sm mt-1 line-clamp-2">{project.description}</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setEditingProject(project)}
-                  className="px-3 py-1 bg-[#2A2A2A] hover:bg-[#3A3A3A] text-sm"
-                >
-                  edit
-                </button>
-                <button
-                  onClick={() => handleDelete(project.id)}
-                  className="px-3 py-1 bg-[#FF4444] hover:bg-[#CC0000] text-sm"
-                >
-                  delete
-                </button>
-              </div>
+      {/* Bottom Sheet Modal */}
+      {showModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm"
+          onClick={closeModal}
+        >
+          <div 
+            className="bg-[#121212] w-full max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-[#2A2A2A] flex justify-between items-center sticky top-0 bg-[#121212]">
+              <h2 className="text-2xl font-poppins text-[#d3d3d3]">
+                {isNewProject ? "new project" : "edit project"}
+              </h2>
+              <button onClick={closeModal} className="text-[#878787] hover:text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-          ))}
+            
+            {/* Form */}
+            <div className="p-6">
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setSaveStatus("saving");
+                
+                if (editingProject && !isNewProject) {
+                  const res = await fetch(`/api/projects/${editingProject.id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                  });
+                  if (res.ok) {
+                    setProjects(projects.map((p) => (p.id === editingProject.id ? { ...p, ...formData } as Project : p)));
+                    setSaveStatus("saved");
+                    setTimeout(() => setSaveStatus("idle"), 2000);
+                  }
+                } else {
+                  const res = await fetch("/api/projects", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                  });
+                  if (res.ok) {
+                    const newProject = await res.json();
+                    setProjects([...projects, newProject]);
+                    setSaveStatus("saved");
+                    setTimeout(() => setSaveStatus("idle"), 2000);
+                  }
+                }
+                closeModal();
+              }} className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">name *</label>
+                  <input
+                    type="text"
+                    value={formData.name || ""}
+                    onChange={(e) => {
+                      const name = e.target.value;
+                      setFormData({ ...formData, name, slug: generateSlug(name) });
+                    }}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">slug *</label>
+                  <input
+                    type="text"
+                    value={formData.slug || ""}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">url</label>
+                  <input
+                    type="url"
+                    value={formData.url || ""}
+                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">description *</label>
+                  <textarea
+                    value={formData.description || ""}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-24 resize-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">long description</label>
+                  <textarea
+                    value={formData.long_description || ""}
+                    onChange={(e) => setFormData({ ...formData, long_description: e.target.value })}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-32 resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">status</label>
+                  <select
+                    value={formData.status || "active"}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
+                  >
+                    <option value="active">active</option>
+                    <option value="wip">wip</option>
+                    <option value="archived">archived</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">technologies</label>
+                  <div className="flex flex-wrap gap-2 p-3 bg-[#1A1A1A] border border-[#2A2A2A] focus-within:border-[#714DD7] transition-colors min-h-[50px]">
+                    {formData.technologies?.map((tech, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-[#2A2A2A] text-white text-sm font-poppins rounded"
+                      >
+                        {tech}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newTechs = [...(formData.technologies || [])];
+                            newTechs.splice(index, 1);
+                            setFormData({ ...formData, technologies: newTechs });
+                          }}
+                          className="text-[#878787] hover:text-white ml-1"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                    <input
+                      type="text"
+                      placeholder={formData.technologies?.length ? "" : "Type and press enter..."}
+                      className="flex-1 min-w-[120px] bg-transparent outline-none text-white font-poppins text-sm"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const value = (e.target as HTMLInputElement).value.trim();
+                          if (value && !formData.technologies?.includes(value)) {
+                            setFormData({
+                              ...formData,
+                              technologies: [...(formData.technologies || []), value],
+                            });
+                            (e.target as HTMLInputElement).value = "";
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">screenshots (one URL per line)</label>
+                  <textarea
+                    value={formData.screenshots?.join("\n") || ""}
+                    onChange={(e) => setFormData({ ...formData, screenshots: e.target.value.split("\n").filter((s) => s.trim()) })}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-24 resize-none"
+                    placeholder="https://example.com/image1.png\nhttps://example.com/image2.png"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[#878787] mb-1 font-poppins text-sm">sort order</label>
+                    <input
+                      type="number"
+                      value={formData.sort_order || 0}
+                      onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) })}
+                      className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 pt-6">
+                    <input
+                      type="checkbox"
+                      checked={formData.featured ? true : false}
+                      onChange={(e) => setFormData({ ...formData, featured: e.target.checked ? 1 : 0 })}
+                      className="w-5 h-5"
+                    />
+                    <label className="text-white">featured</label>
+                  </div>
+                </div>
+                <div className="flex gap-4 mt-4">
+                  <button type="submit" className="flex-1 py-3 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white">
+                    {isNewProject ? "create" : "update"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="flex-1 py-3 bg-[#1A1A1A] hover:bg-[#2A2A2A] transition font-poppins text-white"
+                  >
+                    cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -464,11 +511,13 @@ function PagesTab({
   setPages,
   editingPage,
   setEditingPage,
+  setSaveStatus,
 }: {
   pages: Page[];
   setPages: (p: Page[]) => void;
   editingPage: Page | null;
   setEditingPage: (p: Page | null) => void;
+  setSaveStatus: (s: "idle" | "saving" | "saved") => void;
 }) {
   const [formData, setFormData] = useState<Partial<Page>>({
     title: "",
@@ -503,41 +552,6 @@ function PagesTab({
       .replace(/^-|-$/g, "");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (editingPage) {
-      const res = await fetch(`/api/pages/${editingPage.slug}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        setPages(pages.map((p) => (p.id === editingPage.id ? { ...p, ...formData } as Page : p)));
-        setEditingPage(null);
-      }
-    } else {
-      const res = await fetch("/api/pages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (res.ok) {
-        const newPage = await res.json();
-        setPages([...pages, newPage]);
-        setFormData({
-          title: "",
-          slug: "",
-          content: "",
-          page_type: "page",
-          excerpt: "",
-          cover_image: "",
-          published: 0,
-        });
-      }
-    }
-  };
-
   const handleDelete = async (slug: string) => {
     if (!confirm("Are you sure you want to delete this page?")) return;
     
@@ -547,135 +561,222 @@ function PagesTab({
     }
   };
 
+  // Modal state for pages
+  const [showPageModal, setShowPageModal] = useState(false);
+  const [isNewPage, setIsNewPage] = useState(false);
+
+  const openNewPage = () => {
+    setFormData({
+      title: "",
+      slug: "",
+      content: "",
+      page_type: "page",
+      excerpt: "",
+      cover_image: "",
+      published: 0,
+    });
+    setIsNewPage(true);
+    setShowPageModal(true);
+  };
+
+  const openEditPage = (page: Page) => {
+    setFormData(page);
+    setEditingPage(page);
+    setIsNewPage(false);
+    setShowPageModal(true);
+  };
+
+  const closePageModal = () => {
+    setShowPageModal(false);
+    setEditingPage(null);
+  };
+
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-      {/* Form */}
-      <div className="bg-[#121212] p-6">
-        <h2 className="text-2xl mb-4">{editingPage ? "edit page" : "new page"}</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-[#878787] mb-1">title *</label>
-            <input
-              type="text"
-              value={formData.title || ""}
-              onChange={(e) => {
-                const title = e.target.value;
-                setFormData({ ...formData, title, slug: generateSlug(title) });
-              }}
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1">slug *</label>
-            <input
-              type="text"
-              value={formData.slug || ""}
-              onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1">type</label>
-            <select
-              value={formData.page_type || "page"}
-              onChange={(e) => setFormData({ ...formData, page_type: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white"
-            >
-              <option value="page">page</option>
-              <option value="blog">blog post</option>
-              <option value="project-detail">project detail</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1">excerpt</label>
-            <textarea
-              value={formData.excerpt || ""}
-              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white h-20"
-            />
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1">content (markdown) *</label>
-            <textarea
-              value={formData.content || ""}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white h-48 font-mono text-sm"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-[#878787] mb-1">cover image url</label>
-            <input
-              type="text"
-              value={formData.cover_image || ""}
-              onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={formData.published ? true : false}
-              onChange={(e) => setFormData({ ...formData, published: e.target.checked ? 1 : 0 })}
-              className="w-5 h-5"
-            />
-            <label>published</label>
-          </div>
-          <div className="flex gap-4">
-            <button type="submit" className="flex-1 py-2 bg-[#714DD7] hover:bg-[#6041BA] transition">
-              {editingPage ? "update" : "create"}
-            </button>
-            {editingPage && (
+    <div className="bg-[#121212] p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-poppins text-[#d3d3d3]">pages ({pages.length})</h2>
+        <button
+          onClick={openNewPage}
+          className="px-4 py-2 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white"
+        >
+          + new page
+        </button>
+      </div>
+      
+      <div className="flex flex-col gap-4">
+        {pages.map((page) => (
+          <div key={page.id} className="bg-[#1A1A1A] p-4 flex justify-between items-start">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-white">{page.title}</span>
+                {page.published ? (
+                  <span className="text-xs bg-[#0DCB7D] text-black px-2 py-0.5 rounded">published</span>
+                ) : (
+                  <span className="text-xs bg-[#2A2A2A] text-[#878787] px-2 py-0.5 rounded">draft</span>
+                )}
+                <span className="text-xs text-[#878787]">{page.page_type}</span>
+              </div>
+              <p className="text-[#878787] text-sm mt-1">/{page.slug}</p>
+            </div>
+            <div className="flex gap-2">
               <button
-                type="button"
-                onClick={() => setEditingPage(null)}
-                className="flex-1 py-2 bg-[#1A1A1A] hover:bg-[#2A2A2A] transition"
+                onClick={() => openEditPage(page)}
+                className="px-3 py-1 bg-[#2A2A2A] hover:bg-[#3A3A3A] text-sm text-white"
               >
-                cancel
+                edit
               </button>
-            )}
+              <button
+                onClick={() => handleDelete(page.slug)}
+                className="px-3 py-1 bg-[#FF4444] hover:bg-[#CC0000] text-sm"
+              >
+                delete
+              </button>
+            </div>
           </div>
-        </form>
+        ))}
       </div>
 
-      {/* List */}
-      <div className="bg-[#121212] p-6">
-        <h2 className="text-2xl mb-4">pages ({pages.length})</h2>
-        <div className="flex flex-col gap-4 max-h-[600px] overflow-y-auto">
-          {pages.map((page) => (
-            <div key={page.id} className="bg-[#1A1A1A] p-4 flex justify-between items-start">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{page.title}</span>
-                  {page.published ? (
-                    <span className="text-xs bg-[#0DCB7D] text-black px-2 py-0.5 rounded">published</span>
-                  ) : (
-                    <span className="text-xs bg-[#2A2A2A] px-2 py-0.5 rounded">draft</span>
-                  )}
-                  <span className="text-xs text-[#878787]">{page.page_type}</span>
-                </div>
-                <p className="text-[#878787] text-sm mt-1">/{page.slug}</p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setEditingPage(page)}
-                  className="px-3 py-1 bg-[#2A2A2A] hover:bg-[#3A3A3A] text-sm"
-                >
-                  edit
-                </button>
-                <button
-                  onClick={() => handleDelete(page.slug)}
-                  className="px-3 py-1 bg-[#FF4444] hover:bg-[#CC0000] text-sm"
-                >
-                  delete
-                </button>
-              </div>
+      {/* Bottom Sheet Modal */}
+      {showPageModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm"
+          onClick={closePageModal}
+        >
+          <div 
+            className="bg-[#121212] w-full max-h-[85vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="p-6 border-b border-[#2A2A2A] flex justify-between items-center sticky top-0 bg-[#121212]">
+              <h2 className="text-2xl font-poppins text-[#d3d3d3]">
+                {isNewPage ? "new page" : "edit page"}
+              </h2>
+              <button onClick={closePageModal} className="text-[#878787] hover:text-white">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
             </div>
-          ))}
+            
+            {/* Form */}
+            <div className="p-6">
+              <form onSubmit={async (e) => {
+                e.preventDefault();
+                setSaveStatus("saving");
+                
+                if (editingPage && !isNewPage) {
+                  const res = await fetch(`/api/pages/${editingPage.slug}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                  });
+                  if (res.ok) {
+                    setPages(pages.map((p) => (p.id === editingPage.id ? { ...p, ...formData } as Page : p)));
+                    setSaveStatus("saved");
+                    setTimeout(() => setSaveStatus("idle"), 2000);
+                  }
+                } else {
+                  const res = await fetch("/api/pages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                  });
+                  if (res.ok) {
+                    const newPage = await res.json();
+                    setPages([...pages, newPage]);
+                    setSaveStatus("saved");
+                    setTimeout(() => setSaveStatus("idle"), 2000);
+                  }
+                }
+                closePageModal();
+              }} className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">title *</label>
+                  <input
+                    type="text"
+                    value={formData.title || ""}
+                    onChange={(e) => {
+                      const title = e.target.value;
+                      setFormData({ ...formData, title, slug: generateSlug(title) });
+                    }}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">slug *</label>
+                  <input
+                    type="text"
+                    value={formData.slug || ""}
+                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">type</label>
+                  <select
+                    value={formData.page_type || "page"}
+                    onChange={(e) => setFormData({ ...formData, page_type: e.target.value })}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
+                  >
+                    <option value="page">page</option>
+                    <option value="blog">blog post</option>
+                    <option value="project-detail">project detail</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">excerpt</label>
+                  <textarea
+                    value={formData.excerpt || ""}
+                    onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-20 resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">content (markdown) *</label>
+                  <textarea
+                    value={formData.content || ""}
+                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-48 font-mono text-sm resize-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">cover image url</label>
+                  <input
+                    type="text"
+                    value={formData.cover_image || ""}
+                    onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
+                    className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.published ? true : false}
+                    onChange={(e) => setFormData({ ...formData, published: e.target.checked ? 1 : 0 })}
+                    className="w-5 h-5"
+                  />
+                  <label className="text-white font-poppins">published</label>
+                </div>
+                <div className="flex gap-4 mt-4">
+                  <button type="submit" className="flex-1 py-3 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white">
+                    {isNewPage ? "create" : "update"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closePageModal}
+                    className="flex-1 py-3 bg-[#1A1A1A] hover:bg-[#2A2A2A] transition font-poppins text-white"
+                  >
+                    cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -725,21 +826,21 @@ function ImagesTab() {
   };
 
   return (
-    <div>
-      <div className="bg-[#121212] p-6 mb-8">
-        <h2 className="text-2xl mb-4">upload image</h2>
+    <div className="bg-[#121212] p-6">
+      <div className="mb-6">
+        <h2 className="text-2xl font-poppins mb-4 text-[#d3d3d3]">upload image</h2>
         <input
           type="file"
           accept="image/*"
           onChange={handleUpload}
           disabled={uploading}
-          className="text-white"
+          className="text-white font-poppins"
         />
         {uploading && <p className="text-[#878787] mt-2">uploading...</p>}
       </div>
 
-      <div className="bg-[#121212] p-6">
-        <h2 className="text-2xl mb-4">images ({images.length})</h2>
+      <div>
+        <h2 className="text-2xl font-poppins mb-4 text-[#d3d3d3]">images ({images.length})</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {images.map((image) => (
             <div key={image.key} className="bg-[#1A1A1A] p-4">
@@ -753,7 +854,7 @@ function ImagesTab() {
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => copyUrl(image.key)}
-                  className="flex-1 px-2 py-1 bg-[#2A2A2A] hover:bg-[#3A3A3A] text-xs"
+                  className="flex-1 px-2 py-1 bg-[#2A2A2A] hover:bg-[#3A3A3A] text-xs font-poppins"
                 >
                   copy url
                 </button>
