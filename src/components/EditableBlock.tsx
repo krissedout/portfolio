@@ -192,6 +192,14 @@ export function BlockWrapper({
         {children}
       </div>
 
+      {/* Insert after button */}
+      <button
+        onClick={() => setShowInsertMenu(showInsertMenu === "after" ? null : "after")}
+        className="absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity px-2 py-0.5 bg-[#714DD7] text-white text-xs rounded hover:bg-[#6041BA] z-10"
+      >
+        + insert
+      </button>
+
       {/* Side controls */}
       <div className="absolute -right-12 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button

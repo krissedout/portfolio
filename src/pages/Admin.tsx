@@ -329,18 +329,17 @@ function ProjectsTab({
             </div>
           </div>
           <div>
-            <label className="block text-[#878787] mb-1 font-poppins text-sm">technologies (comma separated)</label>
-            <input
-              type="text"
-              value={formData.technologies?.join(", ") || ""}
+            <label className="block text-[#878787] mb-1 font-poppins text-sm">technologies (comma or newline separated)</label>
+            <textarea
+              value={formData.technologies?.join("\n") || ""}
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  technologies: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
+                  technologies: e.target.value.split(/[,\n]/).map((t) => t.trim()).filter(Boolean),
                 })
               }
-              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
-              placeholder="React, TypeScript, Node.js"
+              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-24 resize-none"
+              placeholder="React\nTypeScript\nNode.js"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
