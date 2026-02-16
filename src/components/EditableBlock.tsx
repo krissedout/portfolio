@@ -62,7 +62,14 @@ export function EditableField({
   }, [value]);
 
   if (!isEditing) {
-    return <span className={className}>{value || placeholder}</span>;
+    if (multiline) {
+      return (
+        <p className={`${className} whitespace-pre-wrap break-words`}>
+          {value || placeholder}
+        </p>
+      );
+    }
+    return <span className={`${className} whitespace-pre-wrap break-words`}>{value || placeholder}</span>;
   }
 
   const baseStyle = "bg-transparent outline-none border-2 border-dashed border-[#714DD7]/50 hover:border-[#714DD7] focus:border-[#714DD7] rounded px-1 -mx-1 transition-colors";
@@ -241,7 +248,7 @@ export function TextBlock({
       value={content.text || ""}
       onChange={(text) => onUpdate({ ...content, text })}
       placeholder="Enter text..."
-      className="text-[#878787] font-poppins text-[24px] md:text-[32px] lg:text-[36px] w-full"
+      className="text-[#878787] font-poppins text-[20px] xl:text-[24px] leading-relaxed w-full whitespace-pre-wrap break-words"
       multiline
       isEditing={isEditing}
     />
@@ -561,10 +568,10 @@ export function BlocksContainer({
     : blocks;
 
   return (
-    <div className="flex flex-col gap-[100px] w-full">
+    <div className="flex flex-col gap-[32px] w-full">
       {/* Preview toggle for editing mode */}
       {isEditing && (
-        <div className="flex items-center gap-4 mb-4 p-2 bg-[#1A1A1A] rounded-lg">
+        <div className="flex items-center gap-4 p-2 bg-[#1A1A1A] rounded-lg mb-4">
           <button
             onClick={() => setIsPreview(!isPreview)}
             className={`px-4 py-1 rounded text-sm ${isPreview ? "bg-[#714DD7] text-white" : "bg-[#2A2A2A] text-[#878787]"}`}

@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
+import { useAuth } from "../components/EditableBlock";
 
 type Project = {
   id: string;
@@ -29,10 +30,6 @@ function ProjectCard({ project, index, onExpand }: { project: Project; index: nu
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div
-            className="w-3 h-3 rounded-full"
-            style={{ backgroundColor: project.color }}
-          />
           <span className="text-white font-poppins text-[24px] xl:text-[32px] font-medium group-hover:text-opacity-80 transition-all">
             {project.name}
           </span>
@@ -78,27 +75,23 @@ function ProjectCard({ project, index, onExpand }: { project: Project; index: nu
 function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
     >
       <motion.div
-        className="bg-[#121212] max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-lg"
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-[#121212] w-full max-h-[85vh] overflow-y-auto"
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        exit={{ y: "100%" }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="p-6 border-b border-[#2A2A2A]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div
-                className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: project.color }}
-              />
               <h2 className="text-3xl font-poppins font-bold text-white">{project.name}</h2>
               {project.status === "wip" && (
                 <span className="text-[#878787] text-[14px] font-poppins bg-[#2A2A2A] px-2 py-0.5 rounded">
@@ -180,6 +173,7 @@ export default function WorkPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     fetch("/api/projects")
@@ -208,6 +202,14 @@ export default function WorkPage() {
               my work
             </span>
             <div className="flex items-center gap-4">
+              {isAuthenticated && (
+                <a
+                  href="/admin"
+                  className="px-4 py-2 text-[14px] font-poppins bg-[#1A1A1A] text-[#878787] hover:text-white hover:bg-[#2A2A2A] transition"
+                >
+                  edit projects
+                </a>
+              )}
               <a
                 href="https://github.com/krissedout"
                 target="_blank"
