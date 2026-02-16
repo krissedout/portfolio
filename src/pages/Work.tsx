@@ -9,7 +9,6 @@ type Project = {
   url: string | null;
   description: string;
   long_description: string | null;
-  color: string;
   status: string;
   screenshots: string[];
   technologies: string[];
@@ -128,7 +127,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
 
         {/* Content */}
         <div className="p-6">
-          <p className="text-[#878787] font-poppins text-lg leading-relaxed mb-6">
+          <p className="text-[#878787] font-poppins text-lg leading-relaxed mb-6 whitespace-pre-wrap">
             {project.long_description || project.description}
           </p>
 

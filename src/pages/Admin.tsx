@@ -461,7 +461,7 @@ function ProjectsTab({
                     value={formData.screenshots?.join("\n") || ""}
                     onChange={(e) => setFormData({ ...formData, screenshots: e.target.value.split("\n").filter((s) => s.trim()) })}
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-24 resize-none"
-                    placeholder="https://example.com/image1.png\nhttps://example.com/image2.png"
+                    placeholder="One URL per line"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
