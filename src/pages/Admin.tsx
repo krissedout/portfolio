@@ -7,7 +7,6 @@ type Project = {
   url: string | null;
   description: string;
   long_description: string | null;
-  color: string;
   status: string;
   screenshots: string[];
   technologies: string[];
@@ -44,6 +43,7 @@ export default function AdminPage() {
   const [pages, setPages] = useState<Page[]>([]);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
 
   // Check auth status
   useEffect(() => {
@@ -92,11 +92,17 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#090909] text-white font-poppins p-8">
-      <div className="max-w-6xl mx-auto">
+      {/* Background */}
+      <div className="fixed inset-0 opacity-20 pointer-events-none">
+        <img src="/wallpaper.jpg" alt="" className="w-full h-full object-cover" />
+      </div>
+      <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">admin dashboard</h1>
+          <h1 className="text-4xl font-bold text-[#d3d3d3]">admin</h1>
           <div className="flex items-center gap-4">
+            {saveStatus === "saving" && <span className="text-[#878787]">saving...</span>}
+            {saveStatus === "saved" && <span className="text-[#0DCB7D]">✓ saved</span>}
             <span className="text-[#878787]">logged in as {authStatus.handle || "admin"}</span>
             <button
               onClick={() => {
@@ -104,7 +110,7 @@ export default function AdminPage() {
                   window.location.reload();
                 });
               }}
-              className="px-4 py-2 bg-[#1A1A1A] text-white hover:bg-[#2A2A2A] transition"
+              className="px-4 py-2 bg-[#1A1A1A] text-white hover:bg-[#2A2A2A] transition border border-[#2A2A2A]"
             >
               logout
             </button>
@@ -117,7 +123,7 @@ export default function AdminPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-3 font-poppins text-lg transition ${activeTab === tab ? "bg-[#714DD7] text-white" : "bg-[#1A1A1A] text-[#878787] hover:bg-[#2A2A2A] hover:text-white"}`}
+              className={`px-6 py-3 font-poppins text-lg transition ${activeTab === tab ? "bg-[#714DD7] text-white" : "bg-[#1A1A1A]/50 text-[#878787] hover:bg-[#2A2A2A] hover:text-white border border-[#2A2A2A]"}`}
             >
               {tab}
             </button>
@@ -131,6 +137,7 @@ export default function AdminPage() {
             setProjects={setProjects}
             editingProject={editingProject}
             setEditingProject={setEditingProject}
+            setSaveStatus={setSaveStatus}
           />
         )}
         {activeTab === "pages" && (
@@ -153,11 +160,13 @@ function ProjectsTab({
   setProjects,
   editingProject,
   setEditingProject,
+  setSaveStatus,
 }: {
   projects: Project[];
   setProjects: (p: Project[]) => void;
   editingProject: Project | null;
   setEditingProject: (p: Project | null) => void;
+  setSaveStatus: (s: "idle" | "saving" | "saved") => void;
 }) {
   const [formData, setFormData] = useState<Partial<Project>>({
     name: "",
@@ -165,7 +174,6 @@ function ProjectsTab({
     url: "",
     description: "",
     long_description: "",
-    color: "#714DD7",
     status: "active",
     screenshots: [],
     technologies: [],
@@ -183,7 +191,6 @@ function ProjectsTab({
         url: "",
         description: "",
         long_description: "",
-        color: "#714DD7",
         status: "active",
         screenshots: [],
         technologies: [],
@@ -202,6 +209,7 @@ function ProjectsTab({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaveStatus("saving");
     
     if (editingProject) {
       // Update existing project
@@ -213,6 +221,8 @@ function ProjectsTab({
       if (res.ok) {
         setProjects(projects.map((p) => (p.id === editingProject.id ? { ...p, ...formData } as Project : p)));
         setEditingProject(null);
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus("idle"), 2000);
       }
     } else {
       // Create new project
@@ -230,13 +240,14 @@ function ProjectsTab({
           url: "",
           description: "",
           long_description: "",
-          color: "#714DD7",
           status: "active",
           screenshots: [],
           technologies: [],
           featured: 0,
           sort_order: 0,
         });
+        setSaveStatus("saved");
+        setTimeout(() => setSaveStatus("idle"), 2000);
       }
     }
   };
@@ -305,28 +316,17 @@ function ProjectsTab({
               className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-32 resize-none"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-[#878787] mb-1 font-poppins text-sm">color</label>
-              <input
-                type="color"
-                value={formData.color || "#714DD7"}
-                onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-full h-12 bg-[#1A1A1A] cursor-pointer border border-[#2A2A2A]"
-              />
-            </div>
-            <div>
-              <label className="block text-[#878787] mb-1 font-poppins text-sm">status</label>
-              <select
-                value={formData.status || "active"}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
-              >
-                <option value="active">active</option>
-                <option value="wip">wip</option>
-                <option value="archived">archived</option>
-              </select>
-            </div>
+          <div>
+            <label className="block text-[#878787] mb-1 font-poppins text-sm">status</label>
+            <select
+              value={formData.status || "active"}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
+            >
+              <option value="active">active</option>
+              <option value="wip">wip</option>
+              <option value="archived">archived</option>
+            </select>
           </div>
           <div>
             <label className="block text-[#878787] mb-1 font-poppins text-sm">technologies</label>
@@ -369,6 +369,15 @@ function ProjectsTab({
                 }}
               />
             </div>
+          </div>
+          <div>
+            <label className="block text-[#878787] mb-1 font-poppins text-sm">screenshots (one URL per line)</label>
+            <textarea
+              value={formData.screenshots?.join("\n") || ""}
+              onChange={(e) => setFormData({ ...formData, screenshots: e.target.value.split("\n").filter((s) => s.trim()) })}
+              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-24 resize-none"
+              placeholder="https://example.com/image1.png\nhttps://example.com/image2.png"
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -414,7 +423,6 @@ function ProjectsTab({
           {projects.map((project) => (
             <div key={project.id} className="bg-[#1A1A1A] p-4 flex justify-between items-start">
               <div className="flex items-start gap-3">
-                <div className="w-3 h-3 rounded-full mt-2" style={{ backgroundColor: project.color }} />
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{project.name}</span>
