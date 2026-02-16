@@ -86,32 +86,24 @@ function HomePage({setPage}: PageProps) {
     )
 }
 
-// Full page wrapper for scrollable content
+// Full page wrapper for scrollable content - same style as floating card but extended to bottom
 function FullPageWrapper({ children, onClose }: { children: React.ReactNode; page: string; onClose: () => void }) {
     return (
         <motion.div
-            className="fixed inset-0 z-40 bg-[#090909]"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
+            className="fixed inset-0 z-40 flex items-start justify-center pt-[10%]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
         >
-            {/* Background */}
-            <div className="absolute inset-0 overflow-hidden">
-                <img
-                    src={wallpaper}
-                    alt="Wallpaper"
-                    className="h-full w-full object-cover object-center opacity-30"
-                />
-            </div>
-
-            {/* Content container - connected to bottom */}
-            <div className="absolute bottom-0 left-0 right-0 h-[85vh] bg-[#121212]/90 backdrop-blur-[20px] rounded-t-[40px] overflow-hidden">
-                {/* Handle for scroll indication */}
-                <div className="flex justify-center pt-4 pb-2">
-                    <div className="w-12 h-1 bg-[#3A3A3A] rounded-full" />
-                </div>
-
+            {/* Content container - same style as floating card but extended to bottom */}
+            <motion.div
+                className="w-[90%] h-[90%] bg-[#121212]/50 flex flex-col items-start justify-between p-[60px] xl:p-20 pb-0 backdrop-blur-[20px]"
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 50, opacity: 0 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+            >
                 {/* Close button */}
                 <button
                     onClick={onClose}
@@ -123,10 +115,10 @@ function FullPageWrapper({ children, onClose }: { children: React.ReactNode; pag
                 </button>
 
                 {/* Page content */}
-                <div className="h-full overflow-y-auto no-scrollbar px-8 xl:px-16 pb-8">
+                <div className="h-full w-full overflow-y-auto no-scrollbar pb-[60px] xl:pb-20">
                     {children}
                 </div>
-            </div>
+            </motion.div>
         </motion.div>
     );
 }
