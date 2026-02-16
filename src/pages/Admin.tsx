@@ -112,14 +112,12 @@ export default function AdminPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-8">
+        <div className="flex gap-2 mb-8">
           {(["projects", "pages", "images"] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2 font-poppins text-lg transition ${
-                activeTab === tab ? "bg-[#714DD7] text-white" : "bg-[#1A1A1A] text-[#878787] hover:bg-[#2A2A2A]"
-              }`}
+              className={`px-6 py-3 font-poppins text-lg transition ${activeTab === tab ? "bg-[#714DD7] text-white" : "bg-[#1A1A1A] text-[#878787] hover:bg-[#2A2A2A] hover:text-white"}`}
             >
               {tab}
             </button>
@@ -256,10 +254,10 @@ function ProjectsTab({
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
       {/* Form */}
       <div className="bg-[#121212] p-6">
-        <h2 className="text-2xl mb-4">{editingProject ? "edit project" : "new project"}</h2>
+        <h2 className="text-2xl font-poppins mb-6 text-[#d3d3d3]">{editingProject ? "edit project" : "new project"}</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-[#878787] mb-1">name *</label>
+            <label className="block text-[#878787] mb-1 font-poppins text-sm">name *</label>
             <input
               type="text"
               value={formData.name || ""}
@@ -267,62 +265,62 @@ function ProjectsTab({
                 const name = e.target.value;
                 setFormData({ ...formData, name, slug: generateSlug(name) });
               }}
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white"
+              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
               required
             />
           </div>
           <div>
-            <label className="block text-[#878787] mb-1">slug *</label>
+            <label className="block text-[#878787] mb-1 font-poppins text-sm">slug *</label>
             <input
               type="text"
               value={formData.slug || ""}
               onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white"
+              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
               required
             />
           </div>
           <div>
-            <label className="block text-[#878787] mb-1">url</label>
+            <label className="block text-[#878787] mb-1 font-poppins text-sm">url</label>
             <input
               type="url"
               value={formData.url || ""}
               onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white"
+              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
             />
           </div>
           <div>
-            <label className="block text-[#878787] mb-1">description *</label>
+            <label className="block text-[#878787] mb-1 font-poppins text-sm">description *</label>
             <textarea
               value={formData.description || ""}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white h-24"
+              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-24 resize-none"
               required
             />
           </div>
           <div>
-            <label className="block text-[#878787] mb-1">long description</label>
+            <label className="block text-[#878787] mb-1 font-poppins text-sm">long description</label>
             <textarea
               value={formData.long_description || ""}
               onChange={(e) => setFormData({ ...formData, long_description: e.target.value })}
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white h-32"
+              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-32 resize-none"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[#878787] mb-1">color</label>
+              <label className="block text-[#878787] mb-1 font-poppins text-sm">color</label>
               <input
                 type="color"
                 value={formData.color || "#714DD7"}
                 onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                className="w-full h-10 bg-[#1A1A1A]"
+                className="w-full h-12 bg-[#1A1A1A] cursor-pointer border border-[#2A2A2A]"
               />
             </div>
             <div>
-              <label className="block text-[#878787] mb-1">status</label>
+              <label className="block text-[#878787] mb-1 font-poppins text-sm">status</label>
               <select
                 value={formData.status || "active"}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full bg-[#1A1A1A] px-4 py-2 text-white"
+                className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
               >
                 <option value="active">active</option>
                 <option value="wip">wip</option>
@@ -331,7 +329,7 @@ function ProjectsTab({
             </div>
           </div>
           <div>
-            <label className="block text-[#878787] mb-1">technologies (comma separated)</label>
+            <label className="block text-[#878787] mb-1 font-poppins text-sm">technologies (comma separated)</label>
             <input
               type="text"
               value={formData.technologies?.join(", ") || ""}
@@ -341,17 +339,18 @@ function ProjectsTab({
                   technologies: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
                 })
               }
-              className="w-full bg-[#1A1A1A] px-4 py-2 text-white"
+              className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
+              placeholder="React, TypeScript, Node.js"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[#878787] mb-1">sort order</label>
+              <label className="block text-[#878787] mb-1 font-poppins text-sm">sort order</label>
               <input
                 type="number"
                 value={formData.sort_order || 0}
                 onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) })}
-                className="w-full bg-[#1A1A1A] px-4 py-2 text-white"
+                className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
               />
             </div>
             <div className="flex items-center gap-2 pt-6">
@@ -364,15 +363,15 @@ function ProjectsTab({
               <label>featured</label>
             </div>
           </div>
-          <div className="flex gap-4">
-            <button type="submit" className="flex-1 py-2 bg-[#714DD7] hover:bg-[#6041BA] transition">
+          <div className="flex gap-4 mt-4">
+            <button type="submit" className="flex-1 py-3 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white">
               {editingProject ? "update" : "create"}
             </button>
             {editingProject && (
               <button
                 type="button"
                 onClick={() => setEditingProject(null)}
-                className="flex-1 py-2 bg-[#1A1A1A] hover:bg-[#2A2A2A] transition"
+                className="flex-1 py-3 bg-[#1A1A1A] hover:bg-[#2A2A2A] transition font-poppins text-white"
               >
                 cancel
               </button>
@@ -383,7 +382,7 @@ function ProjectsTab({
 
       {/* List */}
       <div className="bg-[#121212] p-6">
-        <h2 className="text-2xl mb-4">projects ({projects.length})</h2>
+        <h2 className="text-2xl font-poppins mb-6 text-[#d3d3d3]">projects ({projects.length})</h2>
         <div className="flex flex-col gap-4 max-h-[600px] overflow-y-auto">
           {projects.map((project) => (
             <div key={project.id} className="bg-[#1A1A1A] p-4 flex justify-between items-start">

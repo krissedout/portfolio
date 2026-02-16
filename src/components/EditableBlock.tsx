@@ -138,7 +138,7 @@ export function BlockWrapper({
   return (
     <div
       ref={dragRef}
-      className="relative group"
+      className="relative group h-auto"
     >
       {/* Block controls */}
       <div className="absolute -left-12 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -191,14 +191,6 @@ export function BlockWrapper({
       <div className="border-2 border-dashed border-transparent group-hover:border-[#714DD7]/30 rounded-lg p-2 -m-2 transition-colors">
         {children}
       </div>
-
-      {/* Insert after button */}
-      <button
-        onClick={() => setShowInsertMenu(showInsertMenu === "after" ? null : "after")}
-        className="absolute -bottom-3 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity px-2 py-0.5 bg-[#714DD7] text-white text-xs rounded hover:bg-[#6041BA]"
-      >
-        + insert
-      </button>
 
       {/* Side controls */}
       <div className="absolute -right-12 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
