@@ -217,23 +217,21 @@ export default function Home() {
                             </motion.svg>
                         </div>
 
-                        {/*Line over the content - above floating card (z-50)*/}
+                        {/*Line over the content - positioned to connect with base (z-50)*/}
                         {firstClipPathDone && (
-                            <div className="absolute top-0 left-0 z-50">
-                                <motion.svg width="71" height="98" viewBox="0 0 71 98" fill="none" xmlns="http://www.w3.org/2000/svg" className={"absolute top-[30%] left-[0%]"}>
-                                    <motion.path
-                                        d="M1.90263 1.3873C1.5319 7.01841 2.27976 12.6672 4.10306 18.0079C5.92636 23.3485 8.78902 28.2753 12.5259 32.5041L69.1389 96.309"
-                                        stroke="#D8D8D8"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        fill="none"
-                                        initial={{ pathLength: 0 }}
-                                        animate={{ pathLength: 1 }}
-                                        transition={{ duration: 0.6, ease: "easeInOut", delay: 0.1 }}
-                                    />
-                                </motion.svg>
-                            </div>
+                            <motion.svg width="71" height="98" viewBox="0 0 71 98" fill="none" xmlns="http://www.w3.org/2000/svg" className={"absolute top-[30%] left-[0%] z-50"}>
+                                <motion.path
+                                    d="M1.90263 1.3873C1.5319 7.01841 2.27976 12.6672 4.10306 18.0079C5.92636 23.3485 8.78902 28.2753 12.5259 32.5041L69.1389 96.309"
+                                    stroke="#D8D8D8"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    fill="none"
+                                    initial={{ pathLength: 0 }}
+                                    animate={{ pathLength: 1 }}
+                                    transition={{ duration: 0.6, ease: "easeInOut", delay: 0.1 }}
+                                />
+                            </motion.svg>
                         )}
                     </div>
                 )}
