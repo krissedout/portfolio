@@ -94,7 +94,6 @@ export function EditableField({
 
 // Block wrapper with controls
 export function BlockWrapper({
-  block,
   isEditing,
   onDelete,
   onMoveUp,
@@ -113,7 +112,6 @@ export function BlockWrapper({
   children: React.ReactNode;
 }) {
   const [showInsertMenu, setShowInsertMenu] = useState<"before" | "after" | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const dragRef = useRef<HTMLDivElement>(null);
 
   if (!isEditing) {
@@ -133,7 +131,7 @@ export function BlockWrapper({
   return (
     <div
       ref={dragRef}
-      className={`relative group ${isDragging ? "opacity-50" : ""}`}
+      className="relative group"
     >
       {/* Block controls */}
       <div className="absolute -left-12 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

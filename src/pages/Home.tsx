@@ -87,7 +87,7 @@ function HomePage({setPage}: PageProps) {
 }
 
 // Full page wrapper for scrollable content
-function FullPageWrapper({ children, page, onClose }: { children: React.ReactNode; page: string; onClose: () => void }) {
+function FullPageWrapper({ children, onClose }: { children: React.ReactNode; page: string; onClose: () => void }) {
     return (
         <motion.div
             className="fixed inset-0 z-40 bg-[#090909]"
