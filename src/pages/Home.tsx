@@ -197,29 +197,13 @@ export default function Home() {
                 )}
 
                 {showedBackground && (
-                    /*Paper clip*/
-                    <div className={"absolute top-[5%] right-[2%] pointer-events-none z-50"}>
-                        {/*Clip base*/}
-                        <motion.svg width="142" height="129" viewBox="0 0 142 129" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <motion.path
-                                d="M112.158 98.9127L55.3141 34.8416C52.8341 31.9887 49.3224 30.2378 45.5515 29.9741C41.7806 29.7105 38.0594 30.9556 35.2065 33.4355C32.3536 35.9155 30.6028 39.4272 30.3391 43.1981C30.0754 46.969 31.3205 50.6902 33.8005 53.543L90.6448 117.614C95.6039 123.319 102.626 126.82 110.166 127.347C117.707 127.875 125.148 125.385 130.853 120.426C136.558 115.467 140.059 108.445 140.586 100.904C141.113 93.3636 138.623 85.9225 133.664 80.2178L77.0514 16.4129C73.3839 12.1238 68.9034 8.60334 63.8685 6.05451C58.8336 3.50568 53.3439 1.97894 47.7159 1.56236C42.088 1.14579 36.4333 1.84762 31.078 3.62736C25.7227 5.40711 20.7728 8.22955 16.5137 11.9319C12.2547 15.6342 8.77078 20.1432 6.26303 25.1987C3.75529 30.2542 2.27332 35.7562 1.90259 41.3873"
-                                stroke="#D8D8D8"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                fill="none"
-                                initial={{ pathLength: 0 }}
-                                animate={{ pathLength: 1 }}
-                                transition={{ duration: 0.8, ease: "easeInOut", delay: 0.1 }}
-                                onAnimationComplete={() => setFirstClipPathDone(true)}
-                            />
-                        </motion.svg>
-
-                        {/*Line over the content*/}
-                        {firstClipPathDone && (
-                            <motion.svg width="71" height="98" viewBox="0 0 71 98" fill="none" xmlns="http://www.w3.org/2000/svg" className={"absolute top-[30%] left-[0%]"}>
+                    /*Paper clip - base behind (z-10), line in front (z-50)*/
+                    <div className={"absolute top-[5%] right-[2%] pointer-events-none"}>
+                        {/*Clip base - behind floating card (z-10)*/}
+                        <div className="relative z-10">
+                            <motion.svg width="142" height="129" viewBox="0 0 142 129" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <motion.path
-                                    d="M1.90263 1.3873C1.5319 7.01841 2.27976 12.6672 4.10306 18.0079C5.92636 23.3485 8.78902 28.2753 12.5259 32.5041L69.1389 96.309"
+                                    d="M112.158 98.9127L55.3141 34.8416C52.8341 31.9887 49.3224 30.2378 45.5515 29.9741C41.7806 29.7105 38.0594 30.9556 35.2065 33.4355C32.3536 35.9155 30.6028 39.4272 30.3391 43.1981C30.0754 46.969 31.3205 50.6902 33.8005 53.543L90.6448 117.614C95.6039 123.319 102.626 126.82 110.166 127.347C117.707 127.875 125.148 125.385 130.853 120.426C136.558 115.467 140.059 108.445 140.586 100.904C141.113 93.3636 138.623 85.9225 133.664 80.2178L77.0514 16.4129C73.3839 12.1238 68.9034 8.60334 63.8685 6.05451C58.8336 3.50568 53.3439 1.97894 47.7159 1.56236C42.088 1.14579 36.4333 1.84762 31.078 3.62736C25.7227 5.40711 20.7728 8.22955 16.5137 11.9319C12.2547 15.6342 8.77078 20.1432 6.26303 25.1987C3.75529 30.2542 2.27332 35.7562 1.90259 41.3873"
                                     stroke="#D8D8D8"
                                     strokeWidth="2"
                                     strokeLinecap="round"
@@ -227,9 +211,29 @@ export default function Home() {
                                     fill="none"
                                     initial={{ pathLength: 0 }}
                                     animate={{ pathLength: 1 }}
-                                    transition={{ duration: 0.6, ease: "easeInOut", delay: 0.1 }}
+                                    transition={{ duration: 0.8, ease: "easeInOut", delay: 0.1 }}
+                                    onAnimationComplete={() => setFirstClipPathDone(true)}
                                 />
                             </motion.svg>
+                        </div>
+
+                        {/*Line over the content - above floating card (z-50)*/}
+                        {firstClipPathDone && (
+                            <div className="absolute top-0 left-0 z-50">
+                                <motion.svg width="71" height="98" viewBox="0 0 71 98" fill="none" xmlns="http://www.w3.org/2000/svg" className={"absolute top-[30%] left-[0%]"}>
+                                    <motion.path
+                                        d="M1.90263 1.3873C1.5319 7.01841 2.27976 12.6672 4.10306 18.0079C5.92636 23.3485 8.78902 28.2753 12.5259 32.5041L69.1389 96.309"
+                                        stroke="#D8D8D8"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        fill="none"
+                                        initial={{ pathLength: 0 }}
+                                        animate={{ pathLength: 1 }}
+                                        transition={{ duration: 0.6, ease: "easeInOut", delay: 0.1 }}
+                                    />
+                                </motion.svg>
+                            </div>
                         )}
                     </div>
                 )}
@@ -237,7 +241,7 @@ export default function Home() {
                 {showedBackground && !isFullPage && (
                     // Content - floating card style for home and contact
                     <motion.div
-                        className={"absolute w-[90%] h-[80%] self-center bg-[#121212]/50 flex flex-col items-start justify-between p-[60px] xl:p-20 backdrop-blur-[20px]"}
+                        className={"absolute w-[90%] h-[80%] self-center bg-[#121212]/50 flex flex-col items-start justify-between p-[60px] xl:p-20 backdrop-blur-[20px] z-30"}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.3, delay: 0.2 }}
