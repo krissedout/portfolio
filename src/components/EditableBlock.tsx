@@ -140,16 +140,6 @@ export function BlockWrapper({
       ref={dragRef}
       className="relative group h-auto"
     >
-      {/* Block controls */}
-      <div className="absolute -left-12 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        {/* Drag handle */}
-        <div className="cursor-grab active:cursor-grabbing p-1 bg-[#2A2A2A] rounded text-[#878787] hover:text-white">
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM8 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM14 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM14 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM14 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
-          </svg>
-        </div>
-      </div>
-
       {/* Insert before button */}
       <button
         onClick={() => setShowInsertMenu(showInsertMenu === "before" ? null : "before")}
@@ -189,6 +179,36 @@ export function BlockWrapper({
 
       {/* Main content */}
       <div className="border-2 border-dashed border-transparent group-hover:border-[#714DD7]/30 rounded-lg p-2 -m-2 transition-colors">
+        {/* Block controls inside for visibility */}
+        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+          <button
+            onClick={onMoveUp}
+            className="p-1.5 bg-[#2A2A2A] rounded text-[#878787] hover:text-white"
+            title="Move up"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+            </svg>
+          </button>
+          <button
+            onClick={onMoveDown}
+            className="p-1.5 bg-[#2A2A2A] rounded text-[#878787] hover:text-white"
+            title="Move down"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={onDelete}
+            className="p-1.5 bg-[#FF4444]/20 rounded text-[#FF4444] hover:bg-[#FF4444] hover:text-white"
+            title="Delete"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
         {children}
       </div>
 
@@ -199,34 +219,6 @@ export function BlockWrapper({
       >
         + insert
       </button>
-
-      {/* Side controls */}
-      <div className="absolute -right-12 top-0 bottom-0 flex flex-col justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={onMoveUp}
-          className="p-1 bg-[#2A2A2A] rounded text-[#878787] hover:text-white"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-          </svg>
-        </button>
-        <button
-          onClick={onMoveDown}
-          className="p-1 bg-[#2A2A2A] rounded text-[#878787] hover:text-white"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        <button
-          onClick={onDelete}
-          className="p-1 bg-[#FF4444]/20 rounded text-[#FF4444] hover:bg-[#FF4444] hover:text-white"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
-      </div>
     </div>
   );
 }
