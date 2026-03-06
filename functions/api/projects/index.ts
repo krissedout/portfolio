@@ -1,6 +1,6 @@
 // Projects API - CRUD operations
 /// <reference types="@cloudflare/workers-types" />
-import { requireAuth, json, corsHeaders, handleOptions } from "../../_auth";
+import { requireAuth, json, handleOptions } from "../../_auth";
 
 type Env = {
   DB: D1Database;

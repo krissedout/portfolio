@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { useAuth } from "../components/EditableBlock";
+import { useAuth } from "../components/useAuth";
 
 type Project = {
   id: string;

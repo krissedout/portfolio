@@ -14,7 +14,7 @@ type PagesContext = {
 };
 
 // GET /api/blocks/:id - Get single block
-export async function onRequestGet({ request, env, params }: PagesContext) {
+export async function onRequestGet({ env, params }: PagesContext) {
   const result = await env.DB.prepare(
     "SELECT * FROM blocks WHERE id = ?"
   ).bind(params.id).first<Block>();

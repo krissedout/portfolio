@@ -14,7 +14,7 @@ type PagesContext = {
 };
 
 // GET /api/pages/:slug - Get single page
-export async function onRequestGet({ request, env, params }: PagesContext) {
+export async function onRequestGet({ env, params }: PagesContext) {
   const result = await env.DB.prepare(
     "SELECT * FROM pages WHERE slug = ? OR id = ?"
   ).bind(params.slug, params.slug).first<Page>();

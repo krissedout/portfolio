@@ -1,4 +1,5 @@
-import { useAuth, BlocksContainer } from "../components/EditableBlock";
+import { useAuth } from "../components/useAuth";
+import { BlocksContainer } from "../components/EditableBlock";
 import languagesInventory from "../assets/languages inventory.svg";
 import linux from "../assets/linux.svg";
 import server from "../assets/server.svg";

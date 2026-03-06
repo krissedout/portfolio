@@ -1,4 +1,5 @@
-import { useAuth, BlocksContainer } from "../components/EditableBlock";
+import { useAuth } from "../components/useAuth";
+import { BlocksContainer } from "../components/EditableBlock";
 
 export default function AboutPage() {
   const { isAuthenticated, loading } = useAuth();

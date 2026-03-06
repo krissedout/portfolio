@@ -1,5 +1,19 @@
 import { useState, useEffect } from "react";
 import wallpaper from "../assets/wallpaper.jpg";
+import {
+  getQuickIdentity,
+  clearQuickIdentity,
+  startQuickSignIn,
+} from "@ave-id/sdk/client";
+
+function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
+  const identity = getQuickIdentity();
+  const headers = new Headers(options.headers as HeadersInit | undefined);
+  if (identity?.token) {
+    headers.set("Authorization", `Bearer ${identity.token}`);
+  }
+  return fetch(url, { ...options, headers });
+}
 
 type Project = {
   id: string;
@@ -37,32 +51,30 @@ type AuthStatus = {
 };
 
 export default function AdminPage() {
-  const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"projects" | "pages" | "images">("projects");
+  const [identity] = useState(() => getQuickIdentity());
+  const [authStatus] = useState<AuthStatus | null>(() => {
+    const id = getQuickIdentity();
+    return { authenticated: !!id, handle: id?.handle ?? id?.displayName };
+  });
+  const [loading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"projects" | "pages" | "images">(
+    "projects",
+  );
   const [projects, setProjects] = useState<Project[]>([]);
   const [pages, setPages] = useState<Page[]>([]);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
-
-  // Check auth status
-  useEffect(() => {
-    fetch("/api/auth/status")
-      .then((r) => r.json())
-      .then((data) => {
-        setAuthStatus(data);
-        setLoading(false);
-      });
-  }, []);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
 
   // Fetch projects
   useEffect(() => {
     if (authStatus?.authenticated) {
-      fetch("/api/projects?admin=true")
+      authFetch("/api/projects?admin=true")
         .then((r) => r.json())
         .then(setProjects);
-      fetch("/api/pages?admin=true")
+      authFetch("/api/pages?admin=true")
         .then((r) => r.json())
         .then(setPages);
     }
@@ -80,13 +92,15 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-[#090909] flex flex-col items-center justify-center gap-6">
         <div className="text-white font-poppins text-4xl">admin</div>
-        <p className="text-[#878787] font-poppins text-xl">sign in with your Ave identity to access the admin panel</p>
-        <a
-          href="/api/auth/login"
+        <p className="text-[#878787] font-poppins text-xl">
+          sign in with your Ave identity to access the admin panel
+        </p>
+        <button
+          onClick={() => startQuickSignIn({ returnTo: "/admin" })}
           className="px-8 py-3 bg-[#714DD7] text-white font-poppins text-xl hover:bg-[#6041BA] transition"
         >
           sign in with Ave
-        </a>
+        </button>
       </div>
     );
   }
@@ -102,14 +116,20 @@ export default function AdminPage() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-[#d3d3d3]">admin</h1>
           <div className="flex items-center gap-4">
-            {saveStatus === "saving" && <span className="text-[#878787]">saving...</span>}
-            {saveStatus === "saved" && <span className="text-[#0DCB7D]">✓ saved</span>}
-            <span className="text-[#878787]">logged in as {authStatus.handle || "admin"}</span>
+            {saveStatus === "saving" && (
+              <span className="text-[#878787]">saving...</span>
+            )}
+            {saveStatus === "saved" && (
+              <span className="text-[#0DCB7D]">✓ saved</span>
+            )}
+            <span className="text-[#878787]">
+              logged in as{" "}
+              {identity?.displayName || authStatus.handle || "admin"}
+            </span>
             <button
               onClick={() => {
-                fetch("/api/auth/logout", { method: "POST" }).then(() => {
-                  window.location.reload();
-                });
+                clearQuickIdentity();
+                window.location.reload();
               }}
               className="px-4 py-2 bg-[#1A1A1A] text-white hover:bg-[#2A2A2A] transition border border-[#2A2A2A]"
             >
@@ -183,25 +203,6 @@ function ProjectsTab({
     sort_order: 0,
   });
 
-  useEffect(() => {
-    if (editingProject) {
-      setFormData(editingProject);
-    } else {
-      setFormData({
-        name: "",
-        slug: "",
-        url: "",
-        description: "",
-        long_description: "",
-        status: "active",
-        screenshots: [],
-        technologies: [],
-        featured: 0,
-        sort_order: 0,
-      });
-    }
-  }, [editingProject]);
-
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()
@@ -211,8 +212,8 @@ function ProjectsTab({
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this project?")) return;
-    
-    const res = await fetch(`/api/projects/${id}`, { method: "DELETE" });
+
+    const res = await authFetch(`/api/projects/${id}`, { method: "DELETE" });
     if (res.ok) {
       setProjects(projects.filter((p) => p.id !== id));
     }
@@ -254,7 +255,9 @@ function ProjectsTab({
   return (
     <div className="bg-[#121212] p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-poppins text-[#d3d3d3]">projects ({projects.length})</h2>
+        <h2 className="text-2xl font-poppins text-[#d3d3d3]">
+          projects ({projects.length})
+        </h2>
         <button
           onClick={openNewProject}
           className="px-4 py-2 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white"
@@ -262,22 +265,31 @@ function ProjectsTab({
           + new project
         </button>
       </div>
-      
+
       <div className="flex flex-col gap-4">
         {projects.map((project) => (
-          <div key={project.id} className="bg-[#1A1A1A] p-4 flex justify-between items-start">
+          <div
+            key={project.id}
+            className="bg-[#1A1A1A] p-4 flex justify-between items-start"
+          >
             <div className="flex items-start gap-3">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-white">{project.name}</span>
                   {project.status === "wip" && (
-                    <span className="text-xs bg-[#2A2A2A] text-[#878787] px-2 py-0.5 rounded">wip</span>
+                    <span className="text-xs bg-[#2A2A2A] text-[#878787] px-2 py-0.5 rounded">
+                      wip
+                    </span>
                   )}
                   {project.featured === 1 && (
-                    <span className="text-xs bg-[#714DD7] px-2 py-0.5 rounded">featured</span>
+                    <span className="text-xs bg-[#714DD7] px-2 py-0.5 rounded">
+                      featured
+                    </span>
                   )}
                 </div>
-                <p className="text-[#878787] text-sm mt-1 line-clamp-2">{project.description}</p>
+                <p className="text-[#878787] text-sm mt-1 line-clamp-2">
+                  {project.description}
+                </p>
               </div>
             </div>
             <div className="flex gap-2">
@@ -300,11 +312,11 @@ function ProjectsTab({
 
       {/* Bottom Sheet Modal */}
       {showModal && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm"
           onClick={closeModal}
         >
-          <div 
+          <div
             className="bg-[#121212] w-full max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
@@ -313,99 +325,153 @@ function ProjectsTab({
               <h2 className="text-2xl font-poppins text-[#d3d3d3]">
                 {isNewProject ? "new project" : "edit project"}
               </h2>
-              <button onClick={closeModal} className="text-[#878787] hover:text-white">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <button
+                onClick={closeModal}
+                className="text-[#878787] hover:text-white"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
-            
+
             {/* Form */}
             <div className="p-6">
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                setSaveStatus("saving");
-                
-                if (editingProject && !isNewProject) {
-                  const res = await fetch(`/api/projects/${editingProject.id}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData),
-                  });
-                  if (res.ok) {
-                    setProjects(projects.map((p) => (p.id === editingProject.id ? { ...p, ...formData } as Project : p)));
-                    setSaveStatus("saved");
-                    setTimeout(() => setSaveStatus("idle"), 2000);
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setSaveStatus("saving");
+
+                  if (editingProject && !isNewProject) {
+                    const res = await authFetch(
+                      `/api/projects/${editingProject.id}`,
+                      {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(formData),
+                      },
+                    );
+                    if (res.ok) {
+                      setProjects(
+                        projects.map((p) =>
+                          p.id === editingProject.id
+                            ? ({ ...p, ...formData } as Project)
+                            : p,
+                        ),
+                      );
+                      setSaveStatus("saved");
+                      setTimeout(() => setSaveStatus("idle"), 2000);
+                    }
+                  } else {
+                    const res = await authFetch("/api/projects", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(formData),
+                    });
+                    if (res.ok) {
+                      const newProject = await res.json();
+                      setProjects([...projects, newProject]);
+                      setSaveStatus("saved");
+                      setTimeout(() => setSaveStatus("idle"), 2000);
+                    }
                   }
-                } else {
-                  const res = await fetch("/api/projects", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData),
-                  });
-                  if (res.ok) {
-                    const newProject = await res.json();
-                    setProjects([...projects, newProject]);
-                    setSaveStatus("saved");
-                    setTimeout(() => setSaveStatus("idle"), 2000);
-                  }
-                }
-                closeModal();
-              }} className="flex flex-col gap-4">
+                  closeModal();
+                }}
+                className="flex flex-col gap-4"
+              >
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">name *</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    name *
+                  </label>
                   <input
                     type="text"
                     value={formData.name || ""}
                     onChange={(e) => {
                       const name = e.target.value;
-                      setFormData({ ...formData, name, slug: generateSlug(name) });
+                      setFormData({
+                        ...formData,
+                        name,
+                        slug: generateSlug(name),
+                      });
                     }}
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">slug *</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    slug *
+                  </label>
                   <input
                     type="text"
                     value={formData.slug || ""}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">url</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    url
+                  </label>
                   <input
                     type="url"
                     value={formData.url || ""}
-                    onChange={(e) => setFormData({ ...formData, url: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, url: e.target.value })
+                    }
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">description *</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    description *
+                  </label>
                   <textarea
                     value={formData.description || ""}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-24 resize-none"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">long description</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    long description
+                  </label>
                   <textarea
                     value={formData.long_description || ""}
-                    onChange={(e) => setFormData({ ...formData, long_description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        long_description: e.target.value,
+                      })
+                    }
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-32 resize-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">status</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    status
+                  </label>
                   <select
                     value={formData.status || "active"}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
                   >
                     <option value="active">active</option>
@@ -414,7 +480,9 @@ function ProjectsTab({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">technologies</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    technologies
+                  </label>
                   <div className="flex flex-wrap gap-2 p-3 bg-[#1A1A1A] border border-[#2A2A2A] focus-within:border-[#714DD7] transition-colors min-h-[50px]">
                     {formData.technologies?.map((tech, index) => (
                       <span
@@ -427,7 +495,10 @@ function ProjectsTab({
                           onClick={() => {
                             const newTechs = [...(formData.technologies || [])];
                             newTechs.splice(index, 1);
-                            setFormData({ ...formData, technologies: newTechs });
+                            setFormData({
+                              ...formData,
+                              technologies: newTechs,
+                            });
                           }}
                           className="text-[#878787] hover:text-white ml-1"
                         >
@@ -437,16 +508,28 @@ function ProjectsTab({
                     ))}
                     <input
                       type="text"
-                      placeholder={formData.technologies?.length ? "" : "Type and press enter..."}
+                      placeholder={
+                        formData.technologies?.length
+                          ? ""
+                          : "Type and press enter..."
+                      }
                       className="flex-1 min-w-[120px] bg-transparent outline-none text-white font-poppins text-sm"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
-                          const value = (e.target as HTMLInputElement).value.trim();
-                          if (value && !formData.technologies?.includes(value)) {
+                          const value = (
+                            e.target as HTMLInputElement
+                          ).value.trim();
+                          if (
+                            value &&
+                            !formData.technologies?.includes(value)
+                          ) {
                             setFormData({
                               ...formData,
-                              technologies: [...(formData.technologies || []), value],
+                              technologies: [
+                                ...(formData.technologies || []),
+                                value,
+                              ],
                             });
                             (e.target as HTMLInputElement).value = "";
                           }
@@ -456,21 +539,37 @@ function ProjectsTab({
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">screenshots (one URL per line)</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    screenshots (one URL per line)
+                  </label>
                   <textarea
                     value={formData.screenshots?.join("\n") || ""}
-                    onChange={(e) => setFormData({ ...formData, screenshots: e.target.value.split("\n").filter((s) => s.trim()) })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        screenshots: e.target.value
+                          .split("\n")
+                          .filter((s) => s.trim()),
+                      })
+                    }
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-24 resize-none"
                     placeholder="One URL per line"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[#878787] mb-1 font-poppins text-sm">sort order</label>
+                    <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                      sort order
+                    </label>
                     <input
                       type="number"
                       value={formData.sort_order || 0}
-                      onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          sort_order: parseInt(e.target.value),
+                        })
+                      }
                       className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
                     />
                   </div>
@@ -478,14 +577,22 @@ function ProjectsTab({
                     <input
                       type="checkbox"
                       checked={formData.featured ? true : false}
-                      onChange={(e) => setFormData({ ...formData, featured: e.target.checked ? 1 : 0 })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          featured: e.target.checked ? 1 : 0,
+                        })
+                      }
                       className="w-5 h-5"
                     />
                     <label className="text-white">featured</label>
                   </div>
                 </div>
                 <div className="flex gap-4 mt-4">
-                  <button type="submit" className="flex-1 py-3 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white"
+                  >
                     {isNewProject ? "create" : "update"}
                   </button>
                   <button
@@ -529,22 +636,6 @@ function PagesTab({
     published: 0,
   });
 
-  useEffect(() => {
-    if (editingPage) {
-      setFormData(editingPage);
-    } else {
-      setFormData({
-        title: "",
-        slug: "",
-        content: "",
-        page_type: "page",
-        excerpt: "",
-        cover_image: "",
-        published: 0,
-      });
-    }
-  }, [editingPage]);
-
   const generateSlug = (title: string) => {
     return title
       .toLowerCase()
@@ -554,8 +645,8 @@ function PagesTab({
 
   const handleDelete = async (slug: string) => {
     if (!confirm("Are you sure you want to delete this page?")) return;
-    
-    const res = await fetch(`/api/pages/${slug}`, { method: "DELETE" });
+
+    const res = await authFetch(`/api/pages/${slug}`, { method: "DELETE" });
     if (res.ok) {
       setPages(pages.filter((p) => p.slug !== slug));
     }
@@ -594,7 +685,9 @@ function PagesTab({
   return (
     <div className="bg-[#121212] p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-poppins text-[#d3d3d3]">pages ({pages.length})</h2>
+        <h2 className="text-2xl font-poppins text-[#d3d3d3]">
+          pages ({pages.length})
+        </h2>
         <button
           onClick={openNewPage}
           className="px-4 py-2 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white"
@@ -602,17 +695,24 @@ function PagesTab({
           + new page
         </button>
       </div>
-      
+
       <div className="flex flex-col gap-4">
         {pages.map((page) => (
-          <div key={page.id} className="bg-[#1A1A1A] p-4 flex justify-between items-start">
+          <div
+            key={page.id}
+            className="bg-[#1A1A1A] p-4 flex justify-between items-start"
+          >
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-medium text-white">{page.title}</span>
                 {page.published ? (
-                  <span className="text-xs bg-[#0DCB7D] text-black px-2 py-0.5 rounded">published</span>
+                  <span className="text-xs bg-[#0DCB7D] text-black px-2 py-0.5 rounded">
+                    published
+                  </span>
                 ) : (
-                  <span className="text-xs bg-[#2A2A2A] text-[#878787] px-2 py-0.5 rounded">draft</span>
+                  <span className="text-xs bg-[#2A2A2A] text-[#878787] px-2 py-0.5 rounded">
+                    draft
+                  </span>
                 )}
                 <span className="text-xs text-[#878787]">{page.page_type}</span>
               </div>
@@ -638,11 +738,11 @@ function PagesTab({
 
       {/* Bottom Sheet Modal */}
       {showPageModal && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm"
           onClick={closePageModal}
         >
-          <div 
+          <div
             className="bg-[#121212] w-full max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
@@ -651,73 +751,112 @@ function PagesTab({
               <h2 className="text-2xl font-poppins text-[#d3d3d3]">
                 {isNewPage ? "new page" : "edit page"}
               </h2>
-              <button onClick={closePageModal} className="text-[#878787] hover:text-white">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <button
+                onClick={closePageModal}
+                className="text-[#878787] hover:text-white"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
-            
+
             {/* Form */}
             <div className="p-6">
-              <form onSubmit={async (e) => {
-                e.preventDefault();
-                setSaveStatus("saving");
-                
-                if (editingPage && !isNewPage) {
-                  const res = await fetch(`/api/pages/${editingPage.slug}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData),
-                  });
-                  if (res.ok) {
-                    setPages(pages.map((p) => (p.id === editingPage.id ? { ...p, ...formData } as Page : p)));
-                    setSaveStatus("saved");
-                    setTimeout(() => setSaveStatus("idle"), 2000);
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setSaveStatus("saving");
+
+                  if (editingPage && !isNewPage) {
+                    const res = await authFetch(
+                      `/api/pages/${editingPage.slug}`,
+                      {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(formData),
+                      },
+                    );
+                    if (res.ok) {
+                      setPages(
+                        pages.map((p) =>
+                          p.id === editingPage.id
+                            ? ({ ...p, ...formData } as Page)
+                            : p,
+                        ),
+                      );
+                      setSaveStatus("saved");
+                      setTimeout(() => setSaveStatus("idle"), 2000);
+                    }
+                  } else {
+                    const res = await authFetch("/api/pages", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(formData),
+                    });
+                    if (res.ok) {
+                      const newPage = await res.json();
+                      setPages([...pages, newPage]);
+                      setSaveStatus("saved");
+                      setTimeout(() => setSaveStatus("idle"), 2000);
+                    }
                   }
-                } else {
-                  const res = await fetch("/api/pages", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(formData),
-                  });
-                  if (res.ok) {
-                    const newPage = await res.json();
-                    setPages([...pages, newPage]);
-                    setSaveStatus("saved");
-                    setTimeout(() => setSaveStatus("idle"), 2000);
-                  }
-                }
-                closePageModal();
-              }} className="flex flex-col gap-4">
+                  closePageModal();
+                }}
+                className="flex flex-col gap-4"
+              >
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">title *</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    title *
+                  </label>
                   <input
                     type="text"
                     value={formData.title || ""}
                     onChange={(e) => {
                       const title = e.target.value;
-                      setFormData({ ...formData, title, slug: generateSlug(title) });
+                      setFormData({
+                        ...formData,
+                        title,
+                        slug: generateSlug(title),
+                      });
                     }}
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">slug *</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    slug *
+                  </label>
                   <input
                     type="text"
                     value={formData.slug || ""}
-                    onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, slug: e.target.value })
+                    }
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">type</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    type
+                  </label>
                   <select
                     value={formData.page_type || "page"}
-                    onChange={(e) => setFormData({ ...formData, page_type: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, page_type: e.target.value })
+                    }
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
                   >
                     <option value="page">page</option>
@@ -726,28 +865,40 @@ function PagesTab({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">excerpt</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    excerpt
+                  </label>
                   <textarea
                     value={formData.excerpt || ""}
-                    onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, excerpt: e.target.value })
+                    }
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-20 resize-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">content (markdown) *</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    content (markdown) *
+                  </label>
                   <textarea
                     value={formData.content || ""}
-                    onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, content: e.target.value })
+                    }
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors h-48 font-mono text-sm resize-none"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-[#878787] mb-1 font-poppins text-sm">cover image url</label>
+                  <label className="block text-[#878787] mb-1 font-poppins text-sm">
+                    cover image url
+                  </label>
                   <input
                     type="text"
                     value={formData.cover_image || ""}
-                    onChange={(e) => setFormData({ ...formData, cover_image: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, cover_image: e.target.value })
+                    }
                     className="w-full bg-[#1A1A1A] px-4 py-3 text-white font-poppins border border-[#2A2A2A] focus:border-[#714DD7] focus:outline-none transition-colors"
                   />
                 </div>
@@ -755,13 +906,21 @@ function PagesTab({
                   <input
                     type="checkbox"
                     checked={formData.published ? true : false}
-                    onChange={(e) => setFormData({ ...formData, published: e.target.checked ? 1 : 0 })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        published: e.target.checked ? 1 : 0,
+                      })
+                    }
                     className="w-5 h-5"
                   />
                   <label className="text-white font-poppins">published</label>
                 </div>
                 <div className="flex gap-4 mt-4">
-                  <button type="submit" className="flex-1 py-3 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white">
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 bg-[#714DD7] hover:bg-[#6041BA] transition font-poppins text-white"
+                  >
                     {isNewPage ? "create" : "update"}
                   </button>
                   <button
@@ -783,11 +942,13 @@ function PagesTab({
 
 // Images Tab Component
 function ImagesTab() {
-  const [images, setImages] = useState<{ key: string; url: string; size: number; uploaded: string }[]>([]);
+  const [images, setImages] = useState<
+    { key: string; url: string; size: number; uploaded: string }[]
+  >([]);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/images")
+    authFetch("/api/images")
       .then((r) => r.json())
       .then(setImages);
   }, []);
@@ -800,7 +961,7 @@ function ImagesTab() {
     const formData = new FormData();
     formData.append("file", file);
 
-    const res = await fetch("/api/images", {
+    const res = await authFetch("/api/images", {
       method: "POST",
       body: formData,
     });
@@ -814,8 +975,10 @@ function ImagesTab() {
 
   const handleDelete = async (key: string) => {
     if (!confirm("Are you sure you want to delete this image?")) return;
-    
-    const res = await fetch(`/api/images/${encodeURIComponent(key)}`, { method: "DELETE" });
+
+    const res = await authFetch(`/api/images/${encodeURIComponent(key)}`, {
+      method: "DELETE",
+    });
     if (res.ok) {
       setImages(images.filter((i) => i.key !== key));
     }
@@ -828,7 +991,9 @@ function ImagesTab() {
   return (
     <div className="bg-[#121212] p-6">
       <div className="mb-6">
-        <h2 className="text-2xl font-poppins mb-4 text-[#d3d3d3]">upload image</h2>
+        <h2 className="text-2xl font-poppins mb-4 text-[#d3d3d3]">
+          upload image
+        </h2>
         <input
           type="file"
           accept="image/*"
@@ -840,7 +1005,9 @@ function ImagesTab() {
       </div>
 
       <div>
-        <h2 className="text-2xl font-poppins mb-4 text-[#d3d3d3]">images ({images.length})</h2>
+        <h2 className="text-2xl font-poppins mb-4 text-[#d3d3d3]">
+          images ({images.length})
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {images.map((image) => (
             <div key={image.key} className="bg-[#1A1A1A] p-4">
@@ -850,7 +1017,9 @@ function ImagesTab() {
                 className="w-full h-32 object-cover mb-2"
               />
               <p className="text-sm text-[#878787] truncate">{image.key}</p>
-              <p className="text-xs text-[#878787]">{Math.round(image.size / 1024)} KB</p>
+              <p className="text-xs text-[#878787]">
+                {Math.round(image.size / 1024)} KB
+              </p>
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => copyUrl(image.key)}

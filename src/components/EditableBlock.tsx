@@ -21,23 +21,6 @@ export type Block = {
   isPreview?: boolean;
 };
 
-// Auth context
-export function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("/api/auth/status")
-      .then((r) => r.json())
-      .then((data) => {
-        setIsAuthenticated(data.authenticated === true);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
-
-  return { isAuthenticated, loading };
-}
 
 // Editable text field with dotted border
 export function EditableField({

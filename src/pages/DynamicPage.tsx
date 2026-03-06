@@ -35,7 +35,7 @@ function parseContent(content: string): string {
     // Inline code
     .replace(/`([^`]+)`/g, '<code class="bg-[#1A1A1A] px-2 py-0.5 rounded text-sm font-mono text-[#714DD7]">$1</code>')
     // Lists
-    .replace(/^\- (.*$)/gim, '<li class="text-[#878787] ml-4">$1</li>')
+    .replace(/^- (.*$)/gim, '<li class="text-[#878787] ml-4">$1</li>')
     .replace(/^\d+\. (.*$)/gim, '<li class="text-[#878787] ml-4 list-decimal">$1</li>')
     // Paragraphs
     .replace(/\n\n/g, '</p><p class="text-[#878787] text-lg leading-relaxed my-4">')

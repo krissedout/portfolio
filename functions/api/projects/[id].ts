@@ -14,7 +14,7 @@ type PagesContext = {
 };
 
 // GET /api/projects/:id - Get single project
-export async function onRequestGet({ request, env, params }: PagesContext) {
+export async function onRequestGet({ env, params }: PagesContext) {
   const result = await env.DB.prepare(
     "SELECT * FROM projects WHERE id = ? OR slug = ?"
   ).bind(params.id, params.id).first<Project>();

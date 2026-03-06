@@ -1,37 +1,28 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { motion } from "motion/react";
+import { startQuickSignIn, getQuickIdentity } from "@ave-id/sdk/client";
 
 export default function LoginPage() {
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Check for error in URL params
+  const error = useMemo(() => {
     const params = new URLSearchParams(window.location.search);
     const authError = params.get("auth_error");
-    if (authError) {
-      switch (authError) {
-        case "unauthorized":
-          setError("This identity is not authorized to access the admin panel.");
-          break;
-        case "token_exchange_failed":
-          setError("Failed to exchange authentication token. Please try again.");
-          break;
-        case "invalid_state":
-          setError("Invalid authentication state. Please try again.");
-          break;
-        default:
-          setError("Authentication failed. Please try again.");
-      }
+    if (!authError) return null;
+    switch (authError) {
+      case "unauthorized":
+        return "This identity is not authorized to access the admin panel.";
+      case "token_exchange_failed":
+        return "Failed to exchange authentication token. Please try again.";
+      case "invalid_state":
+        return "Invalid authentication state. Please try again.";
+      default:
+        return "Authentication failed. Please try again.";
     }
+  }, []);
 
-    // Check if already authenticated
-    fetch("/api/auth/status")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.authenticated) {
-          window.location.href = "/";
-        }
-      });
+  useEffect(() => {
+    if (getQuickIdentity()) {
+      window.location.href = "/";
+    }
   }, []);
 
   return (
@@ -56,12 +47,12 @@ export default function LoginPage() {
             </div>
           )}
 
-          <a
-            href="/api/auth/login"
+          <button
+            onClick={() => startQuickSignIn({ returnTo: "/" })}
             className="w-full py-3 bg-[#714DD7] text-white font-poppins text-xl text-center hover:bg-[#6041BA] transition"
           >
             sign in with Ave
-          </a>
+          </button>
 
           <a
             href="/"

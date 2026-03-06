@@ -14,7 +14,7 @@ type PagesContext = {
 };
 
 // GET /api/images/:key - Get image
-export async function onRequestGet({ request, env, params }: PagesContext) {
+export async function onRequestGet({ env, params }: PagesContext) {
   // Decode the key (it might be URL encoded)
   const key = decodeURIComponent(params.key);
   

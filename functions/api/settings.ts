@@ -12,7 +12,7 @@ type PagesContext = {
 };
 
 // GET /api/settings - Get all settings
-export async function onRequestGet({ request, env }: PagesContext) {
+export async function onRequestGet({ env }: PagesContext) {
   const result = await env.DB.prepare("SELECT * FROM settings").all<{ key: string; value: string }>();
   
   const settings: Record<string, string> = {};
