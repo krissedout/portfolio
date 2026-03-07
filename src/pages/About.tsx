@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { basehubQuery } from "../lib/basehub";
+import { renderMarkdown } from "../lib/richText";
 
 export default function AboutPage() {
   const [content, setContent] = useState("");
@@ -7,17 +8,17 @@ export default function AboutPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    basehubQuery<{ about: { content: { html: string } | null } }>(`
+    basehubQuery<{ about: { content: { markdown: string } | null } }>(`
       query AboutPage {
         about {
           content {
-            html
+            markdown
           }
         }
       }
     `)
       .then((data) => {
-        setContent(data.about?.content?.html ?? "");
+        setContent(renderMarkdown(data.about?.content?.markdown ?? ""));
         setError(null);
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load about page"))
@@ -42,7 +43,7 @@ export default function AboutPage() {
         </div>
       ) : (
         <div
-          className="w-full prose prose-invert max-w-none font-poppins text-[#878787]"
+          className="w-full rich-content rich-content--panel"
           dangerouslySetInnerHTML={{ __html: content }}
         />
       )}

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import { basehubQuery } from "../lib/basehub";
+import { renderMarkdown } from "../lib/richText";
 
 type Page = {
   _title: string;
   _slug: string;
-  content: { html: string } | null;
+  content: { markdown: string } | null;
   pageType: string | null;
   excerpt: string | null;
   coverImage: {
@@ -32,11 +33,14 @@ export default function DynamicPage({ slug }: { slug: string }) {
               excerpt
               publishedAt
               content {
-                html
+                markdown
               }
               coverImage {
-                url
-                alt
+                __typename
+                ... on BlockImage {
+                  url
+                  alt
+                }
               }
             }
           }
@@ -111,8 +115,8 @@ export default function DynamicPage({ slug }: { slug: string }) {
         </div>
 
         <div 
-          className="prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: page.content?.html ?? "" }}
+          className="rich-content rich-content--article"
+          dangerouslySetInnerHTML={{ __html: renderMarkdown(page.content?.markdown ?? "") }}
         />
 
         {/* Back link */}

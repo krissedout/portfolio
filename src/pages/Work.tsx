@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
 import { basehubQuery } from "../lib/basehub";
+import { renderMarkdown } from "../lib/richText";
 
 type Project = {
   _id: string;
@@ -8,7 +9,7 @@ type Project = {
   _slug: string;
   url: string | null;
   summary: string | null;
-  longDescription: { html: string } | null;
+  longDescription: { markdown: string } | null;
   status: string | null;
   technologies: string[] | null;
   featured: boolean | null;
@@ -121,9 +122,9 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
 
         <div className="p-6">
           <div
-            className="prose prose-invert max-w-none text-[#878787] mb-6"
+            className="rich-content rich-content--article mb-6"
             dangerouslySetInnerHTML={{
-              __html: project.longDescription?.html ?? `<p>${project.summary ?? ""}</p>`,
+              __html: renderMarkdown(project.longDescription?.markdown ?? project.summary ?? ""),
             }}
           />
 
@@ -183,11 +184,14 @@ export default function WorkPage() {
             technologies
             featured
             longDescription {
-              html
+              markdown
             }
             coverImage {
-              url
-              alt
+              __typename
+              ... on BlockImage {
+                url
+                alt
+              }
             }
           }
         }

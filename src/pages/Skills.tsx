@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { basehubQuery } from "../lib/basehub";
+import { renderMarkdown } from "../lib/richText";
 
 export default function SkillsPage() {
   const [loading, setLoading] = useState(true);
@@ -7,17 +8,17 @@ export default function SkillsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    basehubQuery<{ skills: { content: { html: string } | null } }>(`
+    basehubQuery<{ skills: { content: { markdown: string } | null } }>(`
       query SkillsPage {
         skills {
           content {
-            html
+            markdown
           }
         }
       }
     `)
       .then((data) => {
-        setContent(data.skills?.content?.html ?? "");
+        setContent(renderMarkdown(data.skills?.content?.markdown ?? ""));
         setError(null);
       })
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load skills page"))
@@ -42,7 +43,7 @@ export default function SkillsPage() {
         </div>
       ) : (
         <div
-          className="w-full prose prose-invert max-w-none font-poppins text-[#878787]"
+          className="w-full rich-content rich-content--panel"
           dangerouslySetInnerHTML={{ __html: content }}
         />
       )}
