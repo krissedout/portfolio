@@ -115,7 +115,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
             <img
               src={project.coverImage.url}
               alt={project.coverImage.alt ?? project._title}
-              className="w-full rounded-lg"
+              className="w-full xl:w-1/2 rounded-lg"
             />
           </div>
         )}
