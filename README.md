@@ -1,69 +1,54 @@
-# React + TypeScript + Vite
+# Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This portfolio now uses BaseHub for content and keeps a single Cloudflare Pages Function for the contact form.
 
-Currently, two official plugins are available:
+## Environment
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Create a local `.env` file:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_BASEHUB_TOKEN=your_basehub_read_token
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+For the contact form, set this Cloudflare secret:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```powershell
+wrangler secret put DISCORD_WEBHOOK_URL
 ```
+
+## BaseHub schema
+
+Create these blocks in your BaseHub repo:
+
+### Document: `about`
+- Rich Text: `content`
+
+### Document: `skills`
+- Rich Text: `content`
+
+### List: `projects`
+Each row uses the row title as the project name and auto slug.
+
+- Text: `summary`
+- Rich Text: `longDescription`
+- Select: `status` with options `active`, `wip`, `archived`
+- Text: `url`
+- Select (multiple): `technologies`
+- Boolean: `featured`
+- Media: `coverImage`
+
+### List: `pages`
+Each row uses the row title as the page title and auto slug.
+
+- Select: `pageType` with options `page`, `blog`, `project`
+- Text: `excerpt`
+- Date: `publishedAt`
+- Media: `coverImage`
+- Rich Text: `content`
+
+## Routes
+
+- `/`
+- `/p/:slug`
+- `/blog/:slug`
+- `/project/:slug`

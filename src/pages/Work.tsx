@@ -1,21 +1,21 @@
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
-import { useAuth } from "../components/useAuth";
+import { basehubQuery } from "../lib/basehub";
 
 type Project = {
-  id: string;
-  name: string;
-  slug: string;
+  _id: string;
+  _title: string;
+  _slug: string;
   url: string | null;
-  description: string;
-  long_description: string | null;
-  status: string;
-  screenshots: string[];
-  technologies: string[];
-  featured: number;
-  sort_order: number;
-  created_at: string;
-  updated_at: string;
+  summary: string | null;
+  longDescription: { html: string } | null;
+  status: string | null;
+  technologies: string[] | null;
+  featured: boolean | null;
+  coverImage: {
+    url: string;
+    alt: string | null;
+  } | null;
 };
 
 function ProjectCard({ project, index, onExpand }: { project: Project; index: number; onExpand: (p: Project) => void }) {
@@ -30,7 +30,7 @@ function ProjectCard({ project, index, onExpand }: { project: Project; index: nu
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <span className="text-white font-poppins text-[24px] xl:text-[32px] font-medium group-hover:text-opacity-80 transition-all">
-            {project.name}
+            {project._title}
           </span>
           {project.status === "wip" && (
             <span className="text-[#878787] text-[14px] font-poppins bg-[#2A2A2A] px-2 py-0.5 rounded">
@@ -53,7 +53,7 @@ function ProjectCard({ project, index, onExpand }: { project: Project; index: nu
         </svg>
       </div>
       <p className="text-[#878787] font-poppins text-[16px] xl:text-[20px] leading-relaxed">
-        {project.description}
+        {project.summary}
       </p>
       {project.technologies && project.technologies.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-2">
@@ -91,7 +91,7 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
         <div className="p-6 border-b border-[#2A2A2A]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-3xl font-poppins font-bold text-white">{project.name}</h2>
+              <h2 className="text-3xl font-poppins font-bold text-white">{project._title}</h2>
               {project.status === "wip" && (
                 <span className="text-[#878787] text-[14px] font-poppins bg-[#2A2A2A] px-2 py-0.5 rounded">
                   wip
@@ -109,27 +109,23 @@ function ProjectModal({ project, onClose }: { project: Project; onClose: () => v
           </div>
         </div>
 
-        {/* Screenshots */}
-        {project.screenshots && project.screenshots.length > 0 && (
+        {project.coverImage && (
           <div className="p-6 border-b border-[#2A2A2A]">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {project.screenshots.map((screenshot, i) => (
-                <img
-                  key={i}
-                  src={screenshot}
-                  alt={`${project.name} screenshot ${i + 1}`}
-                  className="w-full rounded-lg"
-                />
-              ))}
-            </div>
+            <img
+              src={project.coverImage.url}
+              alt={project.coverImage.alt ?? project._title}
+              className="w-full rounded-lg"
+            />
           </div>
         )}
 
-        {/* Content */}
         <div className="p-6">
-          <p className="text-[#878787] font-poppins text-lg leading-relaxed mb-6 whitespace-pre-wrap">
-            {project.long_description || project.description}
-          </p>
+          <div
+            className="prose prose-invert max-w-none text-[#878787] mb-6"
+            dangerouslySetInnerHTML={{
+              __html: project.longDescription?.html ?? `<p>${project.summary ?? ""}</p>`,
+            }}
+          />
 
           {/* Technologies */}
           {project.technologies && project.technologies.length > 0 && (
@@ -172,13 +168,33 @@ export default function WorkPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    fetch("/api/projects")
-      .then((r) => r.json())
+    basehubQuery<{ projects: { items: Project[] } }>(`
+      query WorkPage {
+        projects(orderBy: _sys_createdAt__DESC) {
+          items {
+            _id
+            _title
+            _slug
+            summary
+            status
+            url
+            technologies
+            featured
+            longDescription {
+              html
+            }
+            coverImage {
+              url
+              alt
+            }
+          }
+        }
+      }
+    `)
       .then((data) => {
-        setProjects(data);
+        setProjects(data.projects?.items ?? []);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -201,14 +217,6 @@ export default function WorkPage() {
               my work
             </span>
             <div className="flex items-center gap-4">
-              {isAuthenticated && (
-                <a
-                  href="/admin"
-                  className="px-4 py-2 text-[14px] font-poppins bg-[#1A1A1A] text-[#878787] hover:text-white hover:bg-[#2A2A2A] transition"
-                >
-                  edit projects
-                </a>
-              )}
               <a
                 href="https://github.com/krissedout"
                 target="_blank"
@@ -239,7 +247,7 @@ export default function WorkPage() {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
           {projects.map((project, index) => (
             <ProjectCard
-              key={project.id}
+              key={project._id}
               project={project}
               index={index}
               onExpand={setSelectedProject}
