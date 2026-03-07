@@ -173,7 +173,7 @@ export default function WorkPage() {
   useEffect(() => {
     basehubQuery<{ projects: { items: Project[] } }>(`
       query WorkPage {
-        projects(orderBy: _sys_createdAt__DESC) {
+        projects {
           items {
             _id
             _title
